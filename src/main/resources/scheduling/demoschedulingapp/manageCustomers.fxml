@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="330.0" prefWidth="780.0" styleClass="anchor" stylesheets="@../../Styles/stage.css" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="scheduling.demoschedulingapp.Controllers.ManageCustomersController">
+   <children>
+      <TableView fx:id="customer_table" layoutY="32.0" prefHeight="284.0" prefWidth="780.0" styleClass="table" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+        <columns>
+            <TableColumn prefWidth="219.0" text="Customer ID" />
+            <TableColumn prefWidth="161.0" text="Name" />
+            <TableColumn prefWidth="167.0" text="Division ID" />
+            <TableColumn prefWidth="120.0" text="Phone" />
+            <TableColumn prefWidth="112.0" text="Last Updated" />
+        </columns>
+      </TableView>
+      <ButtonBar layoutY="2.0" prefHeight="40.0" prefWidth="780.0" style="-fx-background-color: black;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="2.0">
+        <buttons>
+          <Button fx:id="add_customer" mnemonicParsing="false" onAction="#addCustomer" prefHeight="27.0" prefWidth="318.0" text="Add Customer">
+               <styleClass>
+                  <String fx:value="btn" />
+                  <String fx:value="show_btn" />
+               </styleClass></Button>
+            <Button fx:id="edit_customer" mnemonicParsing="false" onAction="#editCustomer" text="Edit Customer">
+               <styleClass>
+                  <String fx:value="btn" />
+                  <String fx:value="show_btn" />
+               </styleClass></Button>
+            <Button fx:id="delete_customer" mnemonicParsing="false" onAction="#deleteCustomer" text="Delete Customer">
+               <styleClass>
+                  <String fx:value="btn" />
+                  <String fx:value="show_btn" />
+               </styleClass></Button>
+        </buttons>
+         <padding>
+            <Insets right="5.0" />
+         </padding>
+      </ButtonBar>
+   </children>
+</AnchorPane>

@@ -13,16 +13,43 @@
     -fx-border-color:rgba(80, 180, 90, .6);
 }
 
-
-.mainGrid{
- -fx-background-color: black;
-}
-
-.actionMenu{
+.main_page .tab{
 -fx-background-color: black;
--fx-border-width: 0 0 1 0;
--fx-border-color:rgba(255, 255, 255, .6);
+-fx-cursor:hand;
 }
 
+.tab-pane .tab-header-area .tab-header-background{
+    -fx-background-color: black;
+
+}
+.tab-label{
+    -fx-text-fill:white;
+}
+
+.main_page .tab:selected .tab-label{
+-fx-text-fill:green;
+}
+
+.anchor, .table, .table .column-header{
+-fx-background-color:black;
+}
+
+.table .column-header .label{
+    -fx-text-fill:white;
+}
+/*****************manage customer tab***********************/
+
+.manage_customer{
+    -fx-background-color:black;
+}
+
+.customer_button_bar{
+    -fx-background-color:black;
+ }
 
 
+
+.show_btn{
+    -fx-border-width:1 1 1 1;
+    -fx-border-color:rgba(80, 180, 90, .6);
+}

@@ -23,14 +23,24 @@ public class SchedulingApplication extends Application {
         stage.show();
     }
 
-
-    public void changeScene(String fxml, String title) throws IOException{
-        Parent loader = FXMLLoader.load(getClass().getResource(fxml));
-        stg.getScene().setRoot(loader);
-        stg.setTitle(title);
-    }
-
     public static void main(String[] args) {
         launch();
+    }
+
+
+    /**
+     * Changes scene on stage and changes size.
+     * @param fxml
+     * @param title
+     * @param width
+     * @param height
+     * @throws IOException
+     */
+    public void changeScene(String fxml, String title, int width , int height ) throws IOException{
+        Parent loader = FXMLLoader.load(getClass().getResource(fxml));
+        stg.getScene().setRoot(loader);
+        stg.setWidth(width);
+        stg.setHeight(height);
+        stg.setTitle(title);
     }
 }
