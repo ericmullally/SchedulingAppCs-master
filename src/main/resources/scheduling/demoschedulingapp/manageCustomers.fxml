@@ -10,13 +10,13 @@
 
 <AnchorPane prefHeight="330.0" prefWidth="780.0" styleClass="anchor" stylesheets="@../../Styles/stage.css" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="scheduling.demoschedulingapp.Controllers.ManageCustomersController">
    <children>
-      <TableView fx:id="customer_table" layoutY="32.0" prefHeight="284.0" prefWidth="780.0" styleClass="table" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+      <TableView fx:id="customer_table" layoutY="32.0" prefHeight="284.0" prefWidth="780.0" styleClass="table" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="5.0">
         <columns>
-            <TableColumn prefWidth="219.0" text="Customer ID" />
-            <TableColumn prefWidth="161.0" text="Name" />
-            <TableColumn prefWidth="167.0" text="Division ID" />
-            <TableColumn prefWidth="120.0" text="Phone" />
-            <TableColumn prefWidth="112.0" text="Last Updated" />
+            <TableColumn fx:id="customer_id" editable="false" prefWidth="122.0" text="Customer ID" />
+            <TableColumn fx:id="name" prefWidth="169.0" text="Name" />
+            <TableColumn fx:id="create_date" prefWidth="171.0" text="Date Created" />
+            <TableColumn fx:id="phone" prefWidth="151.0" text="Phone" />
+            <TableColumn fx:id="lastUpdate" prefWidth="166.0" text="Last Updated" />
         </columns>
       </TableView>
       <ButtonBar layoutY="2.0" prefHeight="40.0" prefWidth="780.0" style="-fx-background-color: black;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="2.0">

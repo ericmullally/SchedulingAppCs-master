@@ -8,5 +8,7 @@ module scheduling.demoschedulingapp {
     exports scheduling.demoschedulingapp;
     exports scheduling.demoschedulingapp.Controllers;
     opens scheduling.demoschedulingapp.Controllers to javafx.fxml;
+    exports scheduling.demoschedulingapp.Classes;
+    opens scheduling.demoschedulingapp.Classes to javafx.fxml;
 
 }

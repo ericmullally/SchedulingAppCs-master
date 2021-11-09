@@ -57,14 +57,9 @@ public class LoginController {
                 usersPasswordInDb = answer.getString("Password");
             }
             connector.close();
+            return usersPasswordInDb.equals("test");
 
-            if(usersPasswordInDb.equals("test")){
-                return true;
-            }else{
-                return false;
-            }
-
-        }catch(SQLException e){
+            }catch(SQLException e){
             System.out.println(e.getMessage());
             return false;
         }
