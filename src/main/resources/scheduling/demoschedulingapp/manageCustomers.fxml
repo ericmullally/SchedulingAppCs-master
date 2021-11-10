@@ -21,7 +21,7 @@
       </TableView>
       <ButtonBar layoutY="2.0" prefHeight="40.0" prefWidth="780.0" style="-fx-background-color: black;" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="2.0">
         <buttons>
-          <Button fx:id="add_customer" mnemonicParsing="false" onAction="#addCustomer" prefHeight="27.0" prefWidth="318.0" text="Add Customer">
+          <Button fx:id="add_customer" mnemonicParsing="false" onAction="#openAddCustomer" prefHeight="27.0" prefWidth="318.0" text="Add Customer">
                <styleClass>
                   <String fx:value="btn" />
                   <String fx:value="show_btn" />

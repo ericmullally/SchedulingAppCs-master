@@ -4,16 +4,26 @@ package scheduling.demoschedulingapp.Controllers;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseEvent;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import scheduling.demoschedulingapp.Classes.Customer;
 
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.Date;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -27,8 +37,10 @@ public class ManageCustomersController {
     TableView<Customer> customer_table;
     @FXML
     TableColumn<Customer, String> customer_id, name, create_date, phone, lastUpdate;
-    ObservableList<Customer> customers = FXCollections.observableArrayList();
 
+    ObservableList<Customer> customers = FXCollections.observableArrayList();
+    dbUtils connection = new dbUtils();
+    Statement connector = connection.connStatement;
 
     @FXML
     public void initialize() {
@@ -41,9 +53,11 @@ public class ManageCustomersController {
         fillTable();
     }
 
+    /**
+     * NEED TO SEE WHAT HAPPENS IF an entry is missing
+     */
     private void buildCustomerList() {
-        dbUtils connection = new dbUtils();
-        Statement connector = connection.connStatement;
+
         try{
             ResultSet answer =  connector.executeQuery("select * from customers");
             while(answer.next()){
@@ -55,6 +69,7 @@ public class ManageCustomersController {
                 Customer customer = new Customer(cusID, name, create_date, phone, lastUpdate);
                 customers.add(customer);
             }
+            connector.close();
         }catch(SQLException e){
             System.out.println(e.getMessage());
         }
@@ -70,7 +85,55 @@ public class ManageCustomersController {
         }
     }
 
-    public void addCustomer(){
+    /*private boolean verifyFields(){
+       List<String> fields = Arrays.asList("phone", "address", "zip");
+
+       Pattern phonePattern = Pattern.compile("^\\d{10}$");
+       Matcher phoneMatcher = phonePattern.matcher(customerPhoneText.getText());
+
+       Pattern addressPattern = Pattern.compile("[\\\\d]+[A-Za-z0-9\\\\s,\\\\.]+");
+       Matcher addressMatcher  = addressPattern.matcher(customerAddText.getText());
+
+        Pattern zipPattern = Pattern.compile("^[0-9]{5}(?:-[0-9]{4})?$");
+        Matcher zipMatcher  = zipPattern.matcher(customerAddText.getText());
+
+       for(int i =0; i < fields.size(); i ++){
+           Alert fieldAlert = new Alert(Alert.AlertType.ERROR);
+           fieldAlert.setTitle("Incorrect format");
+           switch(fields.get(i)){
+               case "phone":
+                   if(!phoneMatcher.find()){
+                       fieldAlert.setContentText("phone number ");
+                       return false;
+                   }
+                   break;
+               case "address":
+                   if(!addressMatcher.find()){return false;}
+                   break;
+               case "zip":
+                   if(!zipMatcher.find()){return false;}
+                   break;
+               default:
+                   System.out.println("Something has gone terribly " +
+                           "wrong in the verify fields func.");
+                   break;
+           }
+       }
+       return true;
+    }*/
+
+    /**
+     * opens the add customer form.
+     * @throws IOException
+     */
+    public void openAddCustomer() throws IOException {
+        URL fxmlLocation = ManageCustomersController.class.getResource("addCustomer.fxml");
+        FXMLLoader loader = new FXMLLoader(fxmlLocation);
+        Stage addWindow = new Stage();
+        addWindow.setScene( new Scene(loader.load()));
+        addWindow.setTitle("Add Customer");
+        addWindow.initModality(Modality.APPLICATION_MODAL);
+        addWindow.show();
 
     }
 
@@ -81,8 +144,6 @@ public class ManageCustomersController {
     public void deleteCustomer(){
 
     }
-
-
 
 
 }

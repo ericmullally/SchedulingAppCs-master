@@ -10,8 +10,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-
-<AnchorPane prefHeight="400.0" prefWidth="282.0" stylesheets="@../../Styles/stage.css" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="scheduling.demoschedulingapp.AddCustomer">
+<AnchorPane prefHeight="400.0" prefWidth="282.0" stylesheets="@../../Styles/stage.css" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="scheduling.demoschedulingapp.Controllers.addCustomerController">
    <children>
       <GridPane prefHeight="402.0" prefWidth="282.0" styleClass="table" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <columnConstraints>
@@ -26,6 +25,7 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
             <Label styleClass="tab-label" text="Customer ID" />
@@ -34,14 +34,16 @@
             <Label styleClass="tab-label" text="Phone" GridPane.rowIndex="2" />
             <Label styleClass="tab-label" text="Address" GridPane.rowIndex="3" />
             <Label styleClass="tab-label" text="Postal Code" GridPane.rowIndex="4" />
-            <Label styleClass="tab-label" text="Divsion ID" GridPane.rowIndex="5" />
+            <Label styleClass="tab-label" text="Country" GridPane.rowIndex="5" />
             <TextField fx:id="customerNameText" GridPane.columnIndex="1" GridPane.rowIndex="1" />
             <TextField fx:id="customerPhoneText" GridPane.columnIndex="1" GridPane.rowIndex="2" />
             <TextField fx:id="customerAddText" GridPane.columnIndex="1" GridPane.rowIndex="3" />
             <TextField fx:id="postalCodeText" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-            <ComboBox fx:id="divisionDropDown" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-            <Button mnemonicParsing="false" styleClass="btn" text="Submit" GridPane.halignment="CENTER" GridPane.rowIndex="6" />
-            <Button mnemonicParsing="false" styleClass="btn" text="Cancel" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="6" />
+            <ComboBox fx:id="countryDropDown" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+            <Button fx:id="addCustomerSubmit" mnemonicParsing="false" onAction="#makeAddRequest" styleClass="btn" text="Submit" GridPane.halignment="CENTER" GridPane.rowIndex="7" />
+            <Button fx:id="addCustomerCancelBtn" mnemonicParsing="false" onMouseClicked="#addCustomerCancel" styleClass="btn" text="Cancel" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="7" />
+            <Label layoutX="15.0" layoutY="277.0" styleClass="tab-label" text="State or Province" GridPane.rowIndex="6" />
+            <ComboBox fx:id="stateDropDown" layoutX="151.0" layoutY="273.0" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
          </children>
          <padding>
             <Insets bottom="2.0" left="5.0" right="5.0" top="2.0" />
