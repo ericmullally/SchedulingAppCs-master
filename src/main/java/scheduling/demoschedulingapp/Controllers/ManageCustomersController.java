@@ -12,6 +12,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import scheduling.demoschedulingapp.Classes.Customer;
+import scheduling.demoschedulingapp.SchedulingApplication;
 
 
 import java.io.IOException;
@@ -126,18 +127,15 @@ public class ManageCustomersController {
      * opens the add customer form.
      * @throws IOException
      */
-    public void openAddCustomer() throws IOException {
-        URL fxmlLocation = ManageCustomersController.class.getResource("addCustomer.fxml");
-        FXMLLoader loader = new FXMLLoader(fxmlLocation);
-        Stage addWindow = new Stage();
-        addWindow.setScene( new Scene(loader.load()));
-        addWindow.setTitle("Add Customer");
-        addWindow.initModality(Modality.APPLICATION_MODAL);
-        addWindow.show();
-
+    public void openAddCustomer() {
+        try{
+            SchedulingApplication.showNewWindow("addCustomer.fxml", "Add Customer");
+        }catch(IOException e){
+            System.out.println(e.getMessage());
+        }
     }
 
-    public void editCustomer(){
+    public void openEditCustomer(){
 
     }
 

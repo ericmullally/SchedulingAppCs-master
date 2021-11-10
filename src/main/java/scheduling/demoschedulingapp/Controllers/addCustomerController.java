@@ -27,8 +27,9 @@ public class addCustomerController {
 
     public void makeAddRequest(){
         try{
-            ResultSet cusCount = connector.executeQuery("select count(*) from customers");
-            int Customer_ID =  1;
+            ResultSet cusCount = connector.executeQuery("select count(*) as total from customers");
+            cusCount.next();
+            int Customer_ID = cusCount.getInt("total") + 1;
             String Customer_Name = customerNameText.getText();
             String Address = customerAddText.getText();
             String Postal_Code = postalCodeText.getText();

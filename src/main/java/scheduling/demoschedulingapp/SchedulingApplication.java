@@ -4,10 +4,12 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 
 import java.io.IOException;
+import java.net.URL;
 
 
 public class SchedulingApplication extends Application {
@@ -27,7 +29,6 @@ public class SchedulingApplication extends Application {
         launch();
     }
 
-
     /**
      * Changes scene on stage and changes size.
      * @param fxml
@@ -42,5 +43,21 @@ public class SchedulingApplication extends Application {
         stg.setWidth(width);
         stg.setHeight(height);
         stg.setTitle(title);
+    }
+
+    /**
+     * opens a new window on top of the original application.
+     * @param fxml fxml File Name.
+     * @param title Title of the window to open.
+     * @throws IOException
+     */
+    public static void showNewWindow(String fxml, String title) throws IOException {
+
+        Parent loader = FXMLLoader.load(SchedulingApplication.class.getResource(fxml));
+        Stage addWindow = new Stage();
+        addWindow.setScene( new Scene(loader));
+        addWindow.setTitle(title);
+        addWindow.initModality(Modality.APPLICATION_MODAL);
+        addWindow.show();
     }
 }
