@@ -3,6 +3,7 @@ package scheduling.demoschedulingapp.Controllers;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.stage.Stage;
 import scheduling.demoschedulingapp.SchedulingApplication;
 
 import java.io.FileInputStream;
@@ -83,27 +84,31 @@ public class LoginController {
 
     /**
      * sets labels to french if the host system is using french.
+     * Contains Lambda
      */
     private void setLanguage(){
-        HashMap<String, String> FrenchLogin = new HashMap<String, String>(){
+        HashMap<Label, String> FrenchLogin = new HashMap<Label, String>(){
             {
-                put("welcome","Bienvenu");
-                put("subText","Veuillez vous connecter");
-                put("usernameLbl","Nom d'utilisateur");
-                put("passwordLbl","le mot de passe");
-                put("loginBtn","connexion");
-                put("cancelBtn", "Annuler");
+                put(loginWelcome,"Bienvenu");
+                put(loginSubLabel,"Veuillez vous connecter");
+                put(loginUsername,"Nom d'utilisateur");
+                put(loginPass,"le mot de passe");
             }
         };
 
         if(Locale.getDefault().getLanguage() == "fr"){
-            loginWelcome.setText(FrenchLogin.get("welcome"));
-            loginSubLabel.setText(FrenchLogin.get("subText"));
-            loginUsername.setText(FrenchLogin.get("usernameLbl"));
-            loginPass.setText(FrenchLogin.get("passwordLbl"));
-            loginBtn.setText(FrenchLogin.get("loginBtn"));
-            exitBtn.setText(FrenchLogin.get("cancelBtn"));
+            FrenchLogin.forEach((k,v) -> k.setText(v) );
+            loginBtn.setText("connexion");
+            exitBtn.setText("Annuler");
         }
+    }
+
+    /**
+     * closes application.
+     */
+    public void exit(){
+        Stage stage = (Stage) exitBtn.getScene().getWindow();
+        stage.close();
     }
 
 }

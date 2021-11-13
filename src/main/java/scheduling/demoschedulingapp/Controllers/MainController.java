@@ -17,21 +17,22 @@ public class MainController {
         setLanguage();
     }
 
+    /**
+     * sets language to french if it detects the host computer is using french.
+     * contains lambda.
+     */
     private void setLanguage(){
-        HashMap<String, String> FrenchMainTabs = new HashMap<String, String>(){
+        HashMap<Tab, String> FrenchMainTabs = new HashMap<Tab, String>(){
             {
-                put("manage customers","Gérer les clients");
-                put("manage appointments","Gérer les rendez-vous");
-                put("Reports","Rapports");
-                put("logs","Journaux");
+                put(manageCustomerTabLbl,"Gérer les clients");
+                put(manageAppointmentTabLbl,"Gérer les rendez-vous");
+                put(reportsTabLbl,"Rapports");
+                put(logsTabLbl,"Journaux");
             }
         };
 
         if(Locale.getDefault().getLanguage() == "fr"){
-            manageCustomerTabLbl.setText(FrenchMainTabs.get("manage customers"));
-            manageAppointmentTabLbl.setText(FrenchMainTabs.get("manage appointments"));
-            reportsTabLbl.setText(FrenchMainTabs.get("Reports"));
-            logsTabLbl.setText(FrenchMainTabs.get("logs"));
+            FrenchMainTabs.forEach((k,v) -> k.setText(v));
         }
     }
 }

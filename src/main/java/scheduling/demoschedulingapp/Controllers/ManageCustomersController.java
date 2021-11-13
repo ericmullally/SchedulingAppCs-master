@@ -4,6 +4,7 @@ package scheduling.demoschedulingapp.Controllers;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -29,6 +30,8 @@ public class ManageCustomersController {
     TableView<Customer> customer_table;
     @FXML
     TableColumn<Customer, String> customer_id, name, create_date, phone, lastUpdate;
+    @FXML
+    Button add_customer, edit_customer, delete_customer;
 
     ObservableList<Customer> customers = FXCollections.observableArrayList();
     dbUtils connection = new dbUtils();
@@ -46,20 +49,31 @@ public class ManageCustomersController {
         fillTable();
     }
 
+    /**
+     * sets language to french if it detects the host computer is using french.
+     * contains lambda.
+     */
     private void setLanguage(){
-        HashMap<String, String> FrenchLogin = new HashMap<String, String>(){
+        HashMap<Button, String> frenchBtns= new HashMap<Button, String>(){
             {
-                put("welcome","Bienvenu");
-                put("subText","Veuillez vous connecter");
-                put("usernameLbl","Nom d'utilisateur");
-                put("passwordLbl","le mot de passe");
-                put("loginBtn","connexion");
-                put("cancelBtn", "Annuler");
+                put(add_customer, "Ajouter un client");
+                put(edit_customer, "Éditer un client");
+                put(delete_customer, "effacer un client");
+            }
+        };
+        HashMap<TableColumn<Customer, String>, String> frenchLables = new HashMap<TableColumn<Customer, String>, String>(){
+            {
+                put(customer_id, "N ° de client");
+                put(name,"Nom");
+                put(create_date,"Date créée");
+                put(phone, "Téléphone");
+                put(lastUpdate, "Dernière mise à jour");
             }
         };
 
         if(Locale.getDefault().getLanguage() == "fr"){
-
+            frenchBtns.forEach((k,v)-> k.setText(v));
+            frenchLables.forEach((k,v) -> k.setText(v));
         }
     }
 
@@ -86,6 +100,9 @@ public class ManageCustomersController {
 
     }
 
+    /**
+     * fills the customer table with customers in database.
+     */
     private void fillTable() {
         try {
             customer_table.setItems(customers);
@@ -94,43 +111,6 @@ public class ManageCustomersController {
             System.out.println(e.getMessage());
         }
     }
-
-    /*private boolean verifyFields(){
-       List<String> fields = Arrays.asList("phone", "address", "zip");
-
-       Pattern phonePattern = Pattern.compile("^\\d{10}$");
-       Matcher phoneMatcher = phonePattern.matcher(customerPhoneText.getText());
-
-       Pattern addressPattern = Pattern.compile("[\\\\d]+[A-Za-z0-9\\\\s,\\\\.]+");
-       Matcher addressMatcher  = addressPattern.matcher(customerAddText.getText());
-
-        Pattern zipPattern = Pattern.compile("^[0-9]{5}(?:-[0-9]{4})?$");
-        Matcher zipMatcher  = zipPattern.matcher(customerAddText.getText());
-
-       for(int i =0; i < fields.size(); i ++){
-           Alert fieldAlert = new Alert(Alert.AlertType.ERROR);
-           fieldAlert.setTitle("Incorrect format");
-           switch(fields.get(i)){
-               case "phone":
-                   if(!phoneMatcher.find()){
-                       fieldAlert.setContentText("phone number ");
-                       return false;
-                   }
-                   break;
-               case "address":
-                   if(!addressMatcher.find()){return false;}
-                   break;
-               case "zip":
-                   if(!zipMatcher.find()){return false;}
-                   break;
-               default:
-                   System.out.println("Something has gone terribly " +
-                           "wrong in the verify fields func.");
-                   break;
-           }
-       }
-       return true;
-    }*/
 
     /**
      * opens the add customer form.

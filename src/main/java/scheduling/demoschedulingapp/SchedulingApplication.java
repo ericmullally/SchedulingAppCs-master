@@ -7,33 +7,15 @@ import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+
 
 
 public class SchedulingApplication extends Application {
     private static Stage stg;
 
-
     public static void main(String[] args) {
         launch();
-    }
-
-    /**
-     * opens a new window on top of the original application.
-     *
-     * @param fxml  fxml File Name.
-     * @param title Title of the window to open.
-     * @throws IOException
-     */
-    public static void showNewWindow(String fxml, String title) throws IOException {
-
-        Parent loader = FXMLLoader.load(SchedulingApplication.class.getResource(fxml));
-        Stage addWindow = new Stage();
-        addWindow.setScene(new Scene(loader));
-        addWindow.setTitle(title);
-        addWindow.initModality(Modality.APPLICATION_MODAL);
-        addWindow.show();
     }
 
     @Override
@@ -61,4 +43,23 @@ public class SchedulingApplication extends Application {
         stg.setHeight(height);
         stg.setTitle(title);
     }
+
+    /**
+     * opens a new window on top of the original application.
+     *
+     * @param fxml  fxml File Name.
+     * @param title Title of the window to open.
+     * @throws IOException
+     */
+    public static void showNewWindow(String fxml, String title) throws IOException {
+
+        Parent loader = FXMLLoader.load(SchedulingApplication.class.getResource(fxml));
+        Stage addWindow = new Stage();
+        addWindow.setScene(new Scene(loader));
+        addWindow.setTitle(title);
+        addWindow.initModality(Modality.APPLICATION_MODAL);
+        addWindow.show();
+    }
+
+
 }
