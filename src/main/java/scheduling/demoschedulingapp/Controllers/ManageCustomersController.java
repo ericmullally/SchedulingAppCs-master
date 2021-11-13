@@ -4,27 +4,18 @@ package scheduling.demoschedulingapp.Controllers;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.MouseEvent;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import scheduling.demoschedulingapp.Classes.Customer;
 import scheduling.demoschedulingapp.SchedulingApplication;
 
-
 import java.io.IOException;
-import java.net.URL;
-import java.util.Date;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.HashMap;
+import java.util.Locale;
 
 
 /**
@@ -45,6 +36,7 @@ public class ManageCustomersController {
 
     @FXML
     public void initialize() {
+        setLanguage();
         customer_id.setCellValueFactory(new PropertyValueFactory<Customer, String>("customer_id"));
         name.setCellValueFactory(new PropertyValueFactory<Customer, String>("name"));
         create_date.setCellValueFactory(new PropertyValueFactory<Customer, String>("create_date"));
@@ -54,14 +46,31 @@ public class ManageCustomersController {
         fillTable();
     }
 
+    private void setLanguage(){
+        HashMap<String, String> FrenchLogin = new HashMap<String, String>(){
+            {
+                put("welcome","Bienvenu");
+                put("subText","Veuillez vous connecter");
+                put("usernameLbl","Nom d'utilisateur");
+                put("passwordLbl","le mot de passe");
+                put("loginBtn","connexion");
+                put("cancelBtn", "Annuler");
+            }
+        };
+
+        if(Locale.getDefault().getLanguage() == "fr"){
+
+        }
+    }
+
     /**
      * NEED TO SEE WHAT HAPPENS IF an entry is missing
      */
     private void buildCustomerList() {
 
-        try{
-            ResultSet answer =  connector.executeQuery("select * from customers");
-            while(answer.next()){
+        try {
+            ResultSet answer = connector.executeQuery("select * from customers");
+            while (answer.next()) {
                 String cusID = answer.getString("Customer_ID");
                 String name = answer.getString("Customer_Name");
                 String create_date = answer.getString("Create_Date");
@@ -71,17 +80,17 @@ public class ManageCustomersController {
                 customers.add(customer);
             }
             connector.close();
-        }catch(SQLException e){
+        } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
 
     }
 
-    private void fillTable(){
-        try{
+    private void fillTable() {
+        try {
             customer_table.setItems(customers);
 
-        }catch(IndexOutOfBoundsException e){
+        } catch (IndexOutOfBoundsException e) {
             System.out.println(e.getMessage());
         }
     }
@@ -125,21 +134,22 @@ public class ManageCustomersController {
 
     /**
      * opens the add customer form.
+     *
      * @throws IOException
      */
     public void openAddCustomer() {
-        try{
+        try {
             SchedulingApplication.showNewWindow("addCustomer.fxml", "Add Customer");
-        }catch(IOException e){
+        } catch (IOException e) {
             System.out.println(e.getMessage());
         }
     }
 
-    public void openEditCustomer(){
+    public void openEditCustomer() {
 
     }
 
-    public void deleteCustomer(){
+    public void deleteCustomer() {
 
     }
 

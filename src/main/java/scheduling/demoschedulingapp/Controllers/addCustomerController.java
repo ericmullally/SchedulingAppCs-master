@@ -1,12 +1,9 @@
 package scheduling.demoschedulingapp.Controllers;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
-import scheduling.demoschedulingapp.Classes.Customer;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -24,9 +21,8 @@ public class addCustomerController {
     Statement connector = connection.connStatement;
 
 
-
-    public void makeAddRequest(){
-        try{
+    public void makeAddRequest() {
+        try {
             ResultSet cusCount = connector.executeQuery("select count(*) as total from customers");
             cusCount.next();
             int Customer_ID = cusCount.getInt("total") + 1;
@@ -35,19 +31,18 @@ public class addCustomerController {
             String Postal_Code = postalCodeText.getText();
             String Phone = customerPhoneText.getText();
             Date Create_Date = new Date();
-            String Created_By ="current user";
+            String Created_By = "current user";
             Date Last_Update = new Date();
             String Last_Updated_By = "current user";
             int Division_ID = 0;
 
             String addRequest = String.format("insert into customers (Customer_ID, Customer_Name, Address, Postal_Code, Phone," +
                     " Create_Date, Created_By, Last_Update,Last_Updated_By, Division_ID)" +
-                    "values(%d,%s,%s,%s,%s,%t,%s,%t,%d )", Customer_ID, Customer_Name, Address, Postal_Code, Phone, Create_Date, Created_By, Last_Update, Last_Updated_By,Division_ID );
-            ResultSet answer =  connector.executeQuery(addRequest);
+                    "values(%d,%s,%s,%s,%s,%t,%s,%t,%d )", Customer_ID, Customer_Name, Address, Postal_Code, Phone, Create_Date, Created_By, Last_Update, Last_Updated_By, Division_ID);
+            ResultSet answer = connector.executeQuery(addRequest);
             System.out.println(answer.toString());
             connector.close();
-        }
-        catch(SQLException e){
+        } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }

@@ -5,30 +5,30 @@
 <?import javafx.scene.layout.AnchorPane?>
 
 <AnchorPane prefHeight="400.0" prefWidth="780.0" styleClass="mainAnchor" stylesheets="@../../Styles/stage.css" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="scheduling.demoschedulingapp.Controllers.MainController">
-   <children>
-      <TabPane fx:id="main_page" prefHeight="400.0" prefWidth="780.0" styleClass="main_page" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <tabs>
-          <Tab text="Manage Customers">
-            <content>
-              <fx:include source="manageCustomers.fxml"/>
-            </content>
-          </Tab>
-          <Tab text="Manage Appointments">
-            <content>
-              <fx:include source="manageAppointments.fxml"/>
-            </content>
-          </Tab>
-            <Tab text="Reports">
-              <content>
-                <fx:include source="reports.fxml"/>
-              </content>
-            </Tab>
-            <Tab text="Logs">
-              <content>
-                <fx:include source="logs.fxml"/>
-              </content>
-            </Tab>
-        </tabs>
-      </TabPane>
-   </children>
+    <children>
+        <TabPane fx:id="main_page" prefHeight="400.0" prefWidth="780.0" styleClass="main_page" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <tabs>
+                <Tab fx:id="manageCustomerTabLbl" text="Manage Customers">
+                    <content>
+                        <fx:include source="manageCustomers.fxml" />
+                    </content>
+                </Tab>
+                <Tab fx:id="manageAppointmentTabLbl" text="Manage Appointments">
+                    <content>
+                        <fx:include source="manageAppointments.fxml" />
+                    </content>
+                </Tab>
+                <Tab fx:id="reportsTabLbl" text="Reports">
+                    <content>
+                        <fx:include source="reports.fxml" />
+                    </content>
+                </Tab>
+                <Tab fx:id="logsTabLbl" text="Logs">
+                    <content>
+                        <fx:include source="logs.fxml" />
+                    </content>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </children>
 </AnchorPane>

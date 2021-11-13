@@ -13,7 +13,7 @@ public class Customer {
     private String lastUpdate;
 
 
-    public  Customer(String customer_id,String  name, String create_date,String phone, String lastUpdate){
+    public Customer(String customer_id, String name, String create_date, String phone, String lastUpdate) {
         this.customer_id = customer_id;
         this.name = name;
         this.create_date = create_date;
@@ -21,33 +21,43 @@ public class Customer {
         this.lastUpdate = lastUpdate;
     }
 
-    public String getCustomer_id(){
+    public String getCustomer_id() {
         return customer_id;
     }
-    public String getCreate_date(){
+
+    public void setCustomer_id(String customer_id) {
+        this.customer_id = customer_id;
+    }
+
+    public String getCreate_date() {
         return create_date;
     }
-    public String getPhone() { return phone; }
-    public String getLastUpdate(){
+
+    public void setCreate_date(String create_date) {
+        this.create_date = create_date;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getLastUpdate() {
         return lastUpdate;
     }
-    public String getName(){
+
+    public void setLastUpdate(String lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
+
+    public String getName() {
         return name;
     }
 
-    public void setCustomer_id(String  customer_id){
-        this.customer_id = customer_id;
-    }
-    public void setCreate_date(String create_date ){
-        this.create_date = create_date;
-    }
-    public void setPhone(String phone){
-        this.phone = phone;
-    }
-    public void setLastUpdate(String  lastUpdate){
-        this.lastUpdate = lastUpdate;
-    }
-    public void setName(String name){
+    public void setName(String name) {
         this.name = name;
     }
 }

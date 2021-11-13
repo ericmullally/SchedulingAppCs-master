@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.layout.AnchorPane?>
 
-
-<AnchorPane prefHeight="325.0" prefWidth="780.0" styleClass="anchor" stylesheets="@../../Styles/stage.css" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="scheduling.demoschedulingapp.Controllers.LogsController">
-   <children>
-      <TableView layoutY="71.0" prefHeight="200.0" prefWidth="780.0" styleClass="table" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <columns>
-          <TableColumn prefWidth="218.0" text="User Name" />
-            <TableColumn prefWidth="243.0" text="Time" />
-          <TableColumn prefWidth="163.0" text="Date" />
-            <TableColumn prefWidth="155.0" text="Successful" />
-        </columns>
-      </TableView>
-   </children>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" prefHeight="325.0" prefWidth="780.0" styleClass="anchor"
+            stylesheets="@../../Styles/stage.css" xmlns="http://javafx.com/javafx/16"
+            fx:controller="scheduling.demoschedulingapp.Controllers.LogsController">
+    <children>
+        <TableView layoutY="71.0" prefHeight="200.0" prefWidth="780.0" styleClass="table" AnchorPane.bottomAnchor="0.0"
+                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <columns>
+                <TableColumn prefWidth="218.0" text="User Name"/>
+                <TableColumn prefWidth="243.0" text="Time"/>
+                <TableColumn prefWidth="163.0" text="Date"/>
+                <TableColumn prefWidth="155.0" text="Successful"/>
+            </columns>
+        </TableView>
+    </children>
 </AnchorPane>
