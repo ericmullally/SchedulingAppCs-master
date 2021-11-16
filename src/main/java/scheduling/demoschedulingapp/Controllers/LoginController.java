@@ -1,12 +1,11 @@
 package scheduling.demoschedulingapp.Controllers;
 
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import scheduling.demoschedulingapp.Classes.User;
 import scheduling.demoschedulingapp.SchedulingApplication;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,9 +13,8 @@ import java.sql.Statement;
 import java.util.*;
 
 /**
- * still might need an actual login with encryption.
+ * Controls all Login functionality.
  */
-
 public class LoginController {
     @FXML
     TextField nameText;
@@ -26,7 +24,6 @@ public class LoginController {
     Label loginWelcome, loginSubLabel, loginUsername, loginPass, regionLbl;
     @FXML
     Button loginBtn, exitBtn;
-
 
 
     @FXML
@@ -44,12 +41,14 @@ public class LoginController {
         String name = nameText.getText();
         String password = passwordText.getText();
         if (checkLogin(name, password)) {
+            User.getInstance().setUserName(name);
+
             SchedulingApplication mainStage = new SchedulingApplication();
             mainStage.changeScene("main.fxml", "Scheduling App", 780, 400);
         } else {
             Alert loginFail = new Alert(Alert.AlertType.ERROR);
-            loginFail.setTitle("Login Failed.");
-            loginFail.setContentText("the credentials you entered could not be found. Please try again.");
+            loginFail.setTitle(User.getInstance().getSystemLanguage() != "fr" ? "Login Failed." : "Échec de la connexion");
+            loginFail.setContentText( User.getInstance().getSystemLanguage() != "fr" ? "Username or password incorrect." : "Nom d'utilisateur ou mot de passe incorrect.");
             loginFail.showAndWait();
         }
     }
@@ -96,7 +95,7 @@ public class LoginController {
             }
         };
 
-        if(Locale.getDefault().getLanguage() == "fr"){
+        if(User.getInstance().getSystemLanguage() == "fr"){
             FrenchLogin.forEach((k,v) -> k.setText(v) );
             loginBtn.setText("connexion");
             exitBtn.setText("Annuler");

@@ -6,13 +6,15 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
+import scheduling.demoschedulingapp.Classes.User;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Locale;
 
 public class addCustomerController {
@@ -114,30 +116,50 @@ public class addCustomerController {
 
     /**
      * Sends the request to the server to create a new customer.
-     * displays error message if fields are not correct.
+     * displays Success message if customer is added
+     *
      */
     public void makeAddRequest() throws SQLException {
+        if(!checkEntry()){
+            return;
+        }
         try {
+            ResultSet divisionIdRes = connector.executeQuery(String.format("Select Division_ID from first_level_divisions " +
+                                                                            "where Division = \"%s\"", stateDropDown.getValue().toString() ));
+            divisionIdRes.next();
+
+            LocalDateTime date = LocalDateTime.of(LocalDate.now(), LocalTime.now());
+
             String Customer_Name = customerNameText.getText();
             String Address = customerAddText.getText();
             String Postal_Code = postalCodeText.getText();
             String Phone = customerPhoneText.getText();
-            Date Create_Date = new Date();
-            String Created_By = "current user";
-            Date Last_Update = new Date();
-            String Last_Updated_By = "current user";
-            int Division_ID = 0;
+            LocalDateTime Create_Date = date;
+            String Created_By = User.getInstance().getUserName();
+            LocalDateTime Last_Update = date;
+            String Last_Updated_By = User.getInstance().getUserName();
+            int Division_ID = divisionIdRes.getInt(1) ;
 
             String addRequest = String.format("insert into customers (Customer_ID, Customer_Name, Address, Postal_Code, Phone," +
                     " Create_Date, Created_By, Last_Update,Last_Updated_By, Division_ID)" +
-                    "values(%d,%s,%s,%s,%s,%t,%s,%t,%d )", customer_ID, Customer_Name, Address, Postal_Code, Phone, Create_Date, Created_By, Last_Update, Last_Updated_By, Division_ID);
-            ResultSet answer = connector.executeQuery(addRequest);
-            System.out.println(answer.toString());
+                    "values(%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\", \"%s\", %d )", customer_ID, Customer_Name, Address, Postal_Code, Phone, Create_Date, Created_By, Last_Update, Last_Updated_By, Division_ID);
+            connector.execute(addRequest);
+
+            String englishMessage = String.format("%s successfully added to database.", Customer_Name);
+            String frenchMessage = String.format(" %s ajouté avec succès à la base de données.", Customer_Name);
+            Alert success =  new Alert(Alert.AlertType.CONFIRMATION);
+            success.setTitle(User.getInstance().getSystemLanguage() == "en" ? "Success" : "Succès");
+            success.setContentText(User.getInstance().getSystemLanguage() == "fr" ? frenchMessage : englishMessage);
+            success.showAndWait();
+            Stage stage = (Stage) addCustomerCancelBtn.getScene().getWindow();
+            stage.close();
 
         } catch (SQLException e) {
+            String englishMessage = "The server has encountered an error.";
+            String frenchMessage = "Le serveur a rencontré une erreur.";
             Alert connectionErr =  new Alert(Alert.AlertType.ERROR);
-            connectionErr.setTitle("Connection Error");
-            connectionErr.setContentText("The server has encountered an error.");
+            connectionErr.setTitle(User.getInstance().getSystemLanguage() == "en" ? "Connection Error" : "Erreur de connexion");
+            connectionErr.setContentText(User.getInstance().getSystemLanguage() == "fr" ? frenchMessage : englishMessage);
             connectionErr.showAndWait();
             System.out.println(e.getMessage());
         }finally {
@@ -145,42 +167,34 @@ public class addCustomerController {
         }
     }
 
-     /*private boolean verifyFields(){
-       List<String> fields = Arrays.asList("phone", "address", "zip");
+    /**
+     * Ensures a customer name, phone, country and state or province are selected.
+     * Displays the error message if anything is missing.
+     * @return Boolean true is all entries are present false otherwise.
+     */
+    private boolean checkEntry(){
+        if(customerNameText.getText().isBlank() || customerPhoneText.getText().isBlank()) {
+            Alert noEntry = new Alert(Alert.AlertType.ERROR);
+            noEntry.setTitle(User.getInstance().getSystemLanguage() == "fr" ? "Erreur de soumission" : "Submission Error");
+            String messageEnglish =  customerNameText.getText().isBlank() ? "Please enter a name." : "Please enter a phone number.";
+            String messageFrench = customerNameText.getText().isBlank() ? "Veuillez saisir un nom." : "Veuillez saisir un numéro de téléphone.";
+            noEntry.setContentText(User.getInstance().getSystemLanguage() == "fr" ? messageFrench : messageEnglish);
+            noEntry.show();
+            return false;
+        }else if(countryDropDown.getValue() == null || countryDropDown.getValue() == null) {
+            Alert noSelection = new Alert(Alert.AlertType.ERROR);
+            noSelection.setTitle(User.getInstance().getSystemLanguage() == "fr" ? "Erreur de soumission" : "Submission Error");
+            String messageEnglish =countryDropDown.getValue() == null ? "Please select Country and state.": "Please select a state.";
+            String messageFrench = countryDropDown.getValue() == null ? "Veuillez sélectionner le pays et la province." : "Veuillez sélectionner une province.";
+            noSelection.setContentText(User.getInstance().getSystemLanguage() == "fr" ? messageFrench : messageEnglish);
+            noSelection.show();
+            return false;
+        }else {
+         return true;
+        }
 
-       Pattern phonePattern = Pattern.compile("^\\d{10}$");
-       Matcher phoneMatcher = phonePattern.matcher(customerPhoneText.getText());
 
-       Pattern addressPattern = Pattern.compile("[\\\\d]+[A-Za-z0-9\\\\s,\\\\.]+");
-       Matcher addressMatcher  = addressPattern.matcher(customerAddText.getText());
-
-        Pattern zipPattern = Pattern.compile("^[0-9]{5}(?:-[0-9]{4})?$");
-        Matcher zipMatcher  = zipPattern.matcher(customerAddText.getText());
-
-       for(int i =0; i < fields.size(); i ++){
-           Alert fieldAlert = new Alert(Alert.AlertType.ERROR);
-           fieldAlert.setTitle("Incorrect format");
-           switch(fields.get(i)){
-               case "phone":
-                   if(!phoneMatcher.find()){
-                       fieldAlert.setContentText("phone number ");
-                       return false;
-                   }
-                   break;
-               case "address":
-                   if(!addressMatcher.find()){return false;}
-                   break;
-               case "zip":
-                   if(!zipMatcher.find()){return false;}
-                   break;
-               default:
-                   System.out.println("Something has gone terribly " +
-                           "wrong in the verify fields func.");
-                   break;
-           }
-       }
-       return true;
-    }*/
+    }
 
     /**
      * Closes the add customer form.

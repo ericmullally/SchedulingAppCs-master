@@ -9,10 +9,14 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
+/**
+ * @author Eric  Mullally
+ */
 
 
 public class SchedulingApplication extends Application {
     private static Stage stg;
+
 
     public static void main(String[] args) {
         launch();
@@ -28,15 +32,16 @@ public class SchedulingApplication extends Application {
     }
 
     /**
-     * Changes scene on stage and changes size.
+     * Sets the Main scene once user successfully logs in.
      *
-     * @param fxml
-     * @param title
-     * @param width
-     * @param height
+     * @param fxml fxml File Name. String
+     * @param title Title of the window to open. String
+     * @param width Width of new stage. int
+     * @param height Height of new stage. int
      * @throws IOException
      */
     public void changeScene(String fxml, String title, int width, int height) throws IOException {
+
         Parent loader = FXMLLoader.load(getClass().getResource(fxml));
         stg.getScene().setRoot(loader);
         stg.setWidth(width);
