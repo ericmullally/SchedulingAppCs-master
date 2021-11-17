@@ -2,8 +2,15 @@ package scheduling.demoschedulingapp.Controllers;
 
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Tab;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import scheduling.demoschedulingapp.SchedulingApplication;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -33,6 +40,16 @@ public class MainController {
 
         if(Locale.getDefault().getLanguage() == "fr"){
             FrenchMainTabs.forEach((k,v) -> k.setText(v));
+        }
+    }
+
+    public static void refreshList(String nameOfController){
+        switch(nameOfController){
+            case "addCustomerController":
+                ManageCustomersController.buildCustomerList();
+                break;
+            default:
+                return;
         }
     }
 }

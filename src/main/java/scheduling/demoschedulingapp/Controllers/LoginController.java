@@ -9,7 +9,6 @@ import scheduling.demoschedulingapp.SchedulingApplication;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.*;
 
 /**
@@ -28,6 +27,7 @@ public class LoginController {
 
     @FXML
     public void initialize(){
+        dbUtils.establishConnection();
         regionLbl.setText(Locale.getDefault().getCountry() +" " + Calendar.getInstance().getTimeZone().getDisplayName());
         setLanguage();
     }
@@ -61,18 +61,17 @@ public class LoginController {
      * @return true if successful false otherwise.
      */
     private boolean checkLogin(String name, String password) {
-        dbUtils connection = new dbUtils();
-        Statement connector = connection.connStatement;
+
         String requestString = "select User_name, Password from users where User_name = \"test\"";
 //        String requestString = String.format("select User_name, Password from users where User_name = \"%s\"", name);
         String usersPasswordInDb = "";
 
         try {
-            ResultSet answer = connector.executeQuery(requestString);
+            ResultSet answer = dbUtils.connStatement.executeQuery(requestString);
             answer.next();
             usersPasswordInDb = answer.getString("Password");
 
-            connector.close();
+            dbUtils.connStatement.close();
             return usersPasswordInDb.equals("test");
 
         } catch (SQLException e) {

@@ -4,17 +4,24 @@ package scheduling.demoschedulingapp.Controllers;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import scheduling.demoschedulingapp.Classes.Customer;
+import scheduling.demoschedulingapp.Classes.User;
 import scheduling.demoschedulingapp.SchedulingApplication;
+
 
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -33,12 +40,12 @@ public class ManageCustomersController {
     @FXML
     Button add_customer, edit_customer, delete_customer;
 
-    ObservableList<Customer> customers = FXCollections.observableArrayList();
-    dbUtils connection = new dbUtils();
-    Statement connector = connection.connStatement;
+    private static ObservableList<Customer> customers = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
+        dbUtils.establishConnection();
+
         setLanguage();
         customer_id.setCellValueFactory(new PropertyValueFactory<Customer, String>("customer_id"));
         name.setCellValueFactory(new PropertyValueFactory<Customer, String>("name"));
@@ -78,12 +85,13 @@ public class ManageCustomersController {
     }
 
     /**
-     * NEED TO SEE WHAT HAPPENS IF an entry is missing
+     * Builds and refreshes the customer table being displayed.
      */
-    private void buildCustomerList() {
+    public static void buildCustomerList() {
 
         try {
-            ResultSet answer = connector.executeQuery("select * from customers");
+            customers.clear();
+            ResultSet answer = dbUtils.connStatement.executeQuery("select * from customers");
             while (answer.next()) {
                 String cusID = answer.getString("Customer_ID");
                 String name = answer.getString("Customer_Name");
@@ -93,7 +101,7 @@ public class ManageCustomersController {
                 Customer customer = new Customer(cusID, name, create_date, phone, lastUpdate);
                 customers.add(customer);
             }
-            connector.close();
+            dbUtils.connStatement.close();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -119,14 +127,47 @@ public class ManageCustomersController {
      */
     public void openAddCustomer() {
         try {
-            SchedulingApplication.showNewWindow("addCustomer.fxml", "Add Customer");
+            Parent loader = FXMLLoader.load(SchedulingApplication.class.getResource("addCustomer.fxml"));
+            Stage addWindow = new Stage();
+            addWindow.setScene(new Scene(loader));
+            addWindow.setTitle("Add Customer");
+            addWindow.initModality(Modality.APPLICATION_MODAL);
+            addWindow.show();
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
     }
 
+    /**
+     * Opens a new window on top of the original application.
+     * @throws IOException
+     */
+    @FXML
     public void openEditCustomer() {
+        Customer selectedCustomer = customer_table.getSelectionModel().getSelectedItem();
+        if(selectedCustomer == null){
+            String messageEnglish = "Please select a customer to edit.";
+            String messageFrench = "Veuillez sélectionner un client à modifier.";
+            Alert noneSelected = new Alert(Alert.AlertType.ERROR);
+            noneSelected.setTitle(User.getInstance().getSystemLanguage() == "en" ? "No Customer Selected." : "Aucun client sélectionné.");
+            noneSelected.setContentText(User.getInstance().getSystemLanguage() == "en" ? messageEnglish : messageFrench);
+            noneSelected.showAndWait();
+            return;
+        }
+        try {
+            FXMLLoader loader = new FXMLLoader(SchedulingApplication.class.getResource("addCustomer.fxml"));
+            Parent root = loader.load();
+            addCustomerController controller =  loader.getController();
+            controller.makeEdit(selectedCustomer);
 
+            Stage addWindow = new Stage();
+            addWindow.setScene(new Scene(root));
+            addWindow.setTitle("Add Customer");
+            addWindow.initModality(Modality.APPLICATION_MODAL);
+            addWindow.show();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     public void deleteCustomer() {

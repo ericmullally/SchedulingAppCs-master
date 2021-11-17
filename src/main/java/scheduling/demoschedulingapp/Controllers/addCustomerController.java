@@ -6,8 +6,10 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
+import scheduling.demoschedulingapp.Classes.Customer;
 import scheduling.demoschedulingapp.Classes.User;
 
+import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -29,16 +31,20 @@ public class addCustomerController {
     @FXML
     Button addCustomerCancelBtn, addCustomerSubmit;
 
-    dbUtils connection = new dbUtils();
-    Statement connector = connection.connStatement;
     int customer_ID;
 
     @FXML
     public void initialize(){
+        dbUtils.establishConnection();
         setCusID();
         setLanguage();
         setCountriesBoxes();
         customerIdText.setText(String.valueOf( customer_ID));
+    }
+
+    public void makeEdit(Customer customer){
+        this.customer_ID = Integer.parseInt(customer.getCustomer_id());
+        System.out.println("pass");
     }
 
     /**
@@ -46,7 +52,7 @@ public class addCustomerController {
      */
     private void setCusID(){
         try{
-            ResultSet cusCount = connector.executeQuery("select count(*) as total from customers");
+            ResultSet cusCount = dbUtils.connStatement.executeQuery("select count(*) as total from customers");
             cusCount.next();
             customer_ID = cusCount.getInt("total") + 1;
         }catch(SQLException e){
@@ -76,7 +82,7 @@ public class addCustomerController {
         try{
             String request = String.format("select * from first_level_divisions where" +
                     " Country_ID = %s", codes.get(selection));
-            ResultSet statesProvinces = connector.executeQuery(request);
+            ResultSet statesProvinces = dbUtils.connStatement.executeQuery(request);
             while(statesProvinces.next()){
                 stateDropDown.getItems().add(statesProvinces.getString("Division"));
             }
@@ -124,7 +130,7 @@ public class addCustomerController {
             return;
         }
         try {
-            ResultSet divisionIdRes = connector.executeQuery(String.format("Select Division_ID from first_level_divisions " +
+            ResultSet divisionIdRes = dbUtils.connStatement.executeQuery(String.format("Select Division_ID from first_level_divisions " +
                                                                             "where Division = \"%s\"", stateDropDown.getValue().toString() ));
             divisionIdRes.next();
 
@@ -143,7 +149,7 @@ public class addCustomerController {
             String addRequest = String.format("insert into customers (Customer_ID, Customer_Name, Address, Postal_Code, Phone," +
                     " Create_Date, Created_By, Last_Update,Last_Updated_By, Division_ID)" +
                     "values(%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\", \"%s\", %d )", customer_ID, Customer_Name, Address, Postal_Code, Phone, Create_Date, Created_By, Last_Update, Last_Updated_By, Division_ID);
-            connector.execute(addRequest);
+            dbUtils.connStatement.execute(addRequest);
 
             String englishMessage = String.format("%s successfully added to database.", Customer_Name);
             String frenchMessage = String.format(" %s ajouté avec succès à la base de données.", Customer_Name);
@@ -151,7 +157,10 @@ public class addCustomerController {
             success.setTitle(User.getInstance().getSystemLanguage() == "en" ? "Success" : "Succès");
             success.setContentText(User.getInstance().getSystemLanguage() == "fr" ? frenchMessage : englishMessage);
             success.showAndWait();
+
             Stage stage = (Stage) addCustomerCancelBtn.getScene().getWindow();
+            String[] className = this.getClass().getName().split("\\.");
+            MainController.refreshList(className[className.length -1 ]);
             stage.close();
 
         } catch (SQLException e) {
@@ -163,7 +172,7 @@ public class addCustomerController {
             connectionErr.showAndWait();
             System.out.println(e.getMessage());
         }finally {
-            connector.close();
+            dbUtils.connStatement.close();
         }
     }
 
@@ -203,9 +212,8 @@ public class addCustomerController {
     public void addCustomerCancel(MouseEvent mouseEvent) throws SQLException {
         mouseEvent.consume();
         Stage stage = (Stage) addCustomerCancelBtn.getScene().getWindow();
-        connector.close();
+        dbUtils.connStatement.close();
         stage.close();
     }
-
 
 }
