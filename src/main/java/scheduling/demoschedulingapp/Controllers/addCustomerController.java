@@ -9,10 +9,8 @@ import javafx.stage.Stage;
 import scheduling.demoschedulingapp.Classes.Customer;
 import scheduling.demoschedulingapp.Classes.User;
 
-import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -32,10 +30,10 @@ public class addCustomerController {
     Button addCustomerCancelBtn, addCustomerSubmit;
 
     int customer_ID;
+    Boolean isEdit = false;
 
     @FXML
     public void initialize(){
-        dbUtils.establishConnection();
         setCusID();
         setLanguage();
         setCountriesBoxes();
@@ -43,8 +41,14 @@ public class addCustomerController {
     }
 
     public void makeEdit(Customer customer){
+        isEdit =true;
         this.customer_ID = Integer.parseInt(customer.getCustomer_id());
-        System.out.println("pass");
+        customerIdText.setText(String.valueOf(customer_ID));
+        customerNameText.setText(customer.getName());
+        customerAddText.setText(customer.getAddress().split(",")[0]);
+        customerPhoneText.setText(customer.getPhone());
+        postalCodeText.setText(customer.getZip());
+        setDropdowns(customer.getDivisionID());
     }
 
     /**
@@ -52,9 +56,11 @@ public class addCustomerController {
      */
     private void setCusID(){
         try{
-            ResultSet cusCount = dbUtils.connStatement.executeQuery("select count(*) as total from customers");
+            dbUtils.establishConnection();
+            ResultSet cusCount = dbUtils.connStatement.executeQuery("select max(Customer_ID) from customers");
             cusCount.next();
-            customer_ID = cusCount.getInt("total") + 1;
+            customer_ID = cusCount.getInt("max(Customer_ID)") + 1;
+            cusCount.close();
         }catch(SQLException e){
             System.out.println(e.getMessage());
         }
@@ -64,7 +70,7 @@ public class addCustomerController {
      * sets country dropdown choices.
      */
     private void setCountriesBoxes(){
-        ObservableList countries = FXCollections.observableArrayList("-Select-", "US", "UK", "Canada");
+        ObservableList countries = FXCollections.observableArrayList( "U.S", "UK", "Canada");
         countries.forEach(item -> countryDropDown.getItems().add(item));
     }
 
@@ -75,17 +81,19 @@ public class addCustomerController {
         stateDropDown.getItems().clear();
         String selection = countryDropDown.getValue().toString();
         HashMap<String, Integer> codes = new HashMap<String, Integer>(){{
-            put("US", 1);
+            put("U.S", 1);
             put("UK", 2);
             put("Canada", 3);
         }};
         try{
+            dbUtils.establishConnection();
             String request = String.format("select * from first_level_divisions where" +
                     " Country_ID = %s", codes.get(selection));
             ResultSet statesProvinces = dbUtils.connStatement.executeQuery(request);
             while(statesProvinces.next()){
                 stateDropDown.getItems().add(statesProvinces.getString("Division"));
             }
+            statesProvinces.close();
         }catch(SQLException e){
             System.out.println(e.getMessage());
         }
@@ -130,26 +138,10 @@ public class addCustomerController {
             return;
         }
         try {
-            ResultSet divisionIdRes = dbUtils.connStatement.executeQuery(String.format("Select Division_ID from first_level_divisions " +
-                                                                            "where Division = \"%s\"", stateDropDown.getValue().toString() ));
-            divisionIdRes.next();
-
-            LocalDateTime date = LocalDateTime.of(LocalDate.now(), LocalTime.now());
-
+            dbUtils.establishConnection();
             String Customer_Name = customerNameText.getText();
-            String Address = customerAddText.getText();
-            String Postal_Code = postalCodeText.getText();
-            String Phone = customerPhoneText.getText();
-            LocalDateTime Create_Date = date;
-            String Created_By = User.getInstance().getUserName();
-            LocalDateTime Last_Update = date;
-            String Last_Updated_By = User.getInstance().getUserName();
-            int Division_ID = divisionIdRes.getInt(1) ;
 
-            String addRequest = String.format("insert into customers (Customer_ID, Customer_Name, Address, Postal_Code, Phone," +
-                    " Create_Date, Created_By, Last_Update,Last_Updated_By, Division_ID)" +
-                    "values(%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\", \"%s\", %d )", customer_ID, Customer_Name, Address, Postal_Code, Phone, Create_Date, Created_By, Last_Update, Last_Updated_By, Division_ID);
-            dbUtils.connStatement.execute(addRequest);
+            dbUtils.connStatement.execute(buildRequestString());
 
             String englishMessage = String.format("%s successfully added to database.", Customer_Name);
             String frenchMessage = String.format(" %s ajouté avec succès à la base de données.", Customer_Name);
@@ -162,7 +154,6 @@ public class addCustomerController {
             String[] className = this.getClass().getName().split("\\.");
             MainController.refreshList(className[className.length -1 ]);
             stage.close();
-
         } catch (SQLException e) {
             String englishMessage = "The server has encountered an error.";
             String frenchMessage = "Le serveur a rencontré une erreur.";
@@ -173,6 +164,42 @@ public class addCustomerController {
             System.out.println(e.getMessage());
         }finally {
             dbUtils.connStatement.close();
+        }
+    }
+
+    /**
+     * Builds and returns a query string for the database. depending on if the customer is being edited or created.
+     * @return String
+     * @throws SQLException
+     */
+    private String buildRequestString() throws SQLException {
+
+        ResultSet divisionIdRes = dbUtils.connStatement.executeQuery(String.format("Select Division_ID from first_level_divisions " +
+                "where Division = \"%s\"", stateDropDown.getValue().toString()));
+        divisionIdRes.next();
+        LocalDateTime date = LocalDateTime.of(LocalDate.now(), LocalTime.now());
+
+        String Customer_Name = customerNameText.getText();
+        String Address = formatAddress();
+        String Postal_Code = postalCodeText.getText();
+        String Phone = customerPhoneText.getText();
+        String Last_Updated_By = User.getInstance().getUserName();
+        LocalDateTime Last_Update = date;
+        int Division_ID = divisionIdRes.getInt(1);
+
+        if (!isEdit) {
+            LocalDateTime Create_Date = date;
+            String Created_By = User.getInstance().getUserName();
+
+            return String.format("insert into customers (Customer_ID, Customer_Name, Address, Postal_Code, Phone," +
+                    " Create_Date, Created_By, Last_Update,Last_Updated_By, Division_ID)" +
+                    "values(%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\", \"%s\", %d )", customer_ID, Customer_Name,
+                    Address, Postal_Code, Phone, Create_Date, Created_By, Last_Update, Last_Updated_By, Division_ID);
+
+        }else{
+            return String.format("update customers set Customer_Name = \"%s\", Address = \"%s\", Postal_Code = \"%s\", Phone = \"%s\"," +
+                    " Last_Update = \"%s\", Last_Updated_By = \"%s\", Division_ID = %d  where Customer_ID = \"%s\"", Customer_Name, Address,
+                    Postal_Code, Phone, Last_Update, Last_Updated_By, Division_ID, customer_ID);
         }
     }
 
@@ -200,6 +227,43 @@ public class addCustomerController {
             return false;
         }else {
          return true;
+        }
+
+
+    }
+
+    /**
+     * formats the customers address.
+     * @return String
+     */
+    private String formatAddress(){
+        if(countryDropDown.getValue().toString() == "US" || countryDropDown.getValue().toString() == "Uk" ){
+            return String.format("%s, %s", customerAddText.getText(), stateDropDown.getValue().toString());
+        }else{
+            return String.format("%s, %s, %s", customerAddText.getText(), stateDropDown.getValue().toString(), countryDropDown.getValue().toString() );
+        }
+    }
+
+    /**
+     * finds the customers state and country.
+     * then sets the corresponding dropdown values.
+     * @param divisionID int
+     */
+    private void setDropdowns(int divisionID){
+        try{
+            dbUtils.establishConnection();
+            ResultSet stateRes =  dbUtils.connStatement.executeQuery(String.format("select Country_ID, Division from first_level_divisions " +
+                                                                                "where Division_ID = \"%s\"", divisionID));
+            stateRes.next();
+            String state = stateRes.getString("Division");
+            ResultSet countryRes = dbUtils.connStatement.executeQuery(String.format("select Country from countries where Country_ID = \"%s\"", stateRes.getString("Country_ID")));
+            countryRes.next();
+            String country = countryRes.getString("Country");
+            stateDropDown.setValue(state);
+            countryDropDown.setValue(country);
+
+        }catch(SQLException e){
+            System.out.println(e.getMessage());
         }
 
 

@@ -7,10 +7,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -24,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Optional;
 
 
 /**
@@ -44,8 +42,6 @@ public class ManageCustomersController {
 
     @FXML
     public void initialize() {
-        dbUtils.establishConnection();
-
         setLanguage();
         customer_id.setCellValueFactory(new PropertyValueFactory<Customer, String>("customer_id"));
         name.setCellValueFactory(new PropertyValueFactory<Customer, String>("name"));
@@ -90,15 +86,23 @@ public class ManageCustomersController {
     public static void buildCustomerList() {
 
         try {
+            dbUtils.establishConnection();
             customers.clear();
             ResultSet answer = dbUtils.connStatement.executeQuery("select * from customers");
             while (answer.next()) {
                 String cusID = answer.getString("Customer_ID");
                 String name = answer.getString("Customer_Name");
-                String create_date = answer.getString("Create_Date");
+                String address = answer.getString("Address");
+                String zip = answer.getString("Postal_Code");
                 String phone = answer.getString("Phone");
+                String create_date = answer.getString("Create_Date");
+                String createdBy = answer.getString("Created_By");
                 String lastUpdate = answer.getString("Last_Update");
-                Customer customer = new Customer(cusID, name, create_date, phone, lastUpdate);
+                String lastUpdatedBy = answer.getString("Last_Update");
+                int divisionID  = answer.getInt("Division_ID");
+
+                Customer customer = new Customer( cusID,  name,  address,  zip, phone,  create_date,
+                        createdBy,  lastUpdate,  lastUpdatedBy, divisionID);
                 customers.add(customer);
             }
             dbUtils.connStatement.close();
@@ -139,10 +143,8 @@ public class ManageCustomersController {
     }
 
     /**
-     * Opens a new window on top of the original application.
-     * @throws IOException
+     * opens add customer form in edit mode.
      */
-    @FXML
     public void openEditCustomer() {
         Customer selectedCustomer = customer_table.getSelectionModel().getSelectedItem();
         if(selectedCustomer == null){
@@ -162,7 +164,7 @@ public class ManageCustomersController {
 
             Stage addWindow = new Stage();
             addWindow.setScene(new Scene(root));
-            addWindow.setTitle("Add Customer");
+            addWindow.setTitle("Edit Customer");
             addWindow.initModality(Modality.APPLICATION_MODAL);
             addWindow.show();
         } catch (Exception e) {
@@ -170,7 +172,40 @@ public class ManageCustomersController {
         }
     }
 
+    /**
+     * Must be adjusted to delete all customer appointments once the appoinment manager is completed.
+     */
     public void deleteCustomer() {
+        Customer selectedCustomer = customer_table.getSelectionModel().getSelectedItem();
+        if(selectedCustomer == null){
+            String messageEnglish = "Please select a customer to Delete.";
+            String messageFrench = "Veuillez sélectionner un client à Effacer.";
+            Alert noneSelected = new Alert(Alert.AlertType.ERROR);
+            noneSelected.setTitle(User.getInstance().getSystemLanguage() == "en" ? "No Customer Selected." : "Aucun client sélectionné.");
+            noneSelected.setContentText(User.getInstance().getSystemLanguage() == "en" ? messageEnglish : messageFrench);
+            noneSelected.showAndWait();
+            return;
+        }
+
+        String messageEnglish = "Customer will be deleted as well as any appointments associated with this customer. Do you wish to proceed?";
+        String messageFrench = "Le client sera supprimé ainsi que tous les rendez-vous associés à ce client. Voulez-vous continuer?";
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle(User.getInstance().getSystemLanguage() == "en" ? "Delete Customer" : "Supprimer le client");
+        confirmation.setContentText(User.getInstance().getSystemLanguage() == "en"  ? messageEnglish : messageFrench);
+        Optional<ButtonType> confirmed = confirmation.showAndWait();
+
+        if(confirmed.isPresent() && confirmed.get() == ButtonType.OK){
+            try{
+                dbUtils.establishConnection();
+                dbUtils.connStatement.execute(String.format("delete from customers where Customer_ID = \"%s\"", selectedCustomer.getCustomer_id()));
+                buildCustomerList();
+            }catch(SQLException e){
+                System.out.println(e.getMessage());
+            }
+        }else {
+            return;
+        }
+
 
     }
 
