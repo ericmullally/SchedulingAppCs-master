@@ -40,9 +40,14 @@ public class addCustomerController {
         customerIdText.setText(String.valueOf( customer_ID));
     }
 
+    /**
+     * Makes the add customer form behave like an edit form.
+     * instead of creating a whole new controller for edit.
+     * @param customer the customer object to be edited.
+     */
     public void makeEdit(Customer customer){
         isEdit =true;
-        this.customer_ID = Integer.parseInt(customer.getCustomer_id());
+        this.customer_ID = Integer.parseInt(customer.getCustomer_id()); /*will overwrite the previously set ID*/
         customerIdText.setText(String.valueOf(customer_ID));
         customerNameText.setText(customer.getName());
         customerAddText.setText(customer.getAddress().split(",")[0]);
@@ -52,7 +57,7 @@ public class addCustomerController {
     }
 
     /**
-     * Sets the customer ID
+     * Sets the customer ID unique based on the number of customers in the database.
      */
     private void setCusID(){
         try{
@@ -70,7 +75,7 @@ public class addCustomerController {
      * sets country dropdown choices.
      */
     private void setCountriesBoxes(){
-        ObservableList countries = FXCollections.observableArrayList( "U.S", "UK", "Canada");
+        ObservableList<String> countries = FXCollections.observableArrayList( "U.S", "UK", "Canada");
         countries.forEach(item -> countryDropDown.getItems().add(item));
     }
 
@@ -80,7 +85,7 @@ public class addCustomerController {
     public void setStateBoxes(){
         stateDropDown.getItems().clear();
         String selection = countryDropDown.getValue().toString();
-        HashMap<String, Integer> codes = new HashMap<String, Integer>(){{
+        HashMap<String, Integer> codes = new HashMap<>() {{
             put("U.S", 1);
             put("UK", 2);
             put("Canada", 3);
@@ -103,26 +108,27 @@ public class addCustomerController {
      * sets labels to french if the host system is using french.
      * Contains Lambda
      */
+    @SuppressWarnings("Convert2MethodRef")
     private void setLanguage(){
-        HashMap<Label, String> frenchLabels = new HashMap<Label, String>(){
+        HashMap<Label, String> frenchLabels = new HashMap<>() {
             {
-                put(customerIdLbl,"N ° de client");
-                put(customerNameLbl,"Nom du client");
-                put(phoneLbl,"Téléphone");
-                put(addressLbl,"Adresse");
-                put(postalLbl,"Code postal");
-                put(countryLbl,"Pays");
-                put(stateLbl,"Province");
+                put(customerIdLbl, "N ° de client");
+                put(customerNameLbl, "Nom du client");
+                put(phoneLbl, "Téléphone");
+                put(addressLbl, "Adresse");
+                put(postalLbl, "Code postal");
+                put(countryLbl, "Pays");
+                put(stateLbl, "Province");
             }
         };
-        HashMap<Button, String> frenchButtons = new HashMap<Button, String>(){
+        HashMap<Button, String> frenchButtons = new HashMap<>() {
             {
                 put(addCustomerCancelBtn, "Ajouter un client");
                 put(addCustomerSubmit, "Annuler");
             }
         };
 
-        if(Locale.getDefault().getLanguage() == "fr"){
+        if(Locale.getDefault().getLanguage().equals("fr")){
             frenchLabels.forEach((k,v) -> k.setText(v) );
             frenchButtons.forEach((k,v) -> k.setText(v) );
         }
@@ -139,15 +145,14 @@ public class addCustomerController {
         }
         try {
             dbUtils.establishConnection();
-            String Customer_Name = customerNameText.getText();
-
             dbUtils.connStatement.execute(buildRequestString());
 
-            String englishMessage = String.format("%s successfully added to database.", Customer_Name);
-            String frenchMessage = String.format(" %s ajouté avec succès à la base de données.", Customer_Name);
+            String Customer_Name = customerNameText.getText();
+            String englishMessage = !isEdit ? String.format("%s successfully added to database.", Customer_Name) : String.format("%s successfully edited.", Customer_Name) ;
+            String frenchMessage = !isEdit ? String.format(" %s ajouté avec succès à la base de données.", Customer_Name) : String.format(" %s Modifié avec succès.", Customer_Name);
             Alert success =  new Alert(Alert.AlertType.CONFIRMATION);
-            success.setTitle(User.getInstance().getSystemLanguage() == "en" ? "Success" : "Succès");
-            success.setContentText(User.getInstance().getSystemLanguage() == "fr" ? frenchMessage : englishMessage);
+            success.setTitle(User.getInstance().getSystemLanguage().equals("en") ? "Success" : "Succès");
+            success.setContentText(User.getInstance().getSystemLanguage().equals("fr") ? frenchMessage : englishMessage);
             success.showAndWait();
 
             Stage stage = (Stage) addCustomerCancelBtn.getScene().getWindow();
@@ -158,8 +163,8 @@ public class addCustomerController {
             String englishMessage = "The server has encountered an error.";
             String frenchMessage = "Le serveur a rencontré une erreur.";
             Alert connectionErr =  new Alert(Alert.AlertType.ERROR);
-            connectionErr.setTitle(User.getInstance().getSystemLanguage() == "en" ? "Connection Error" : "Erreur de connexion");
-            connectionErr.setContentText(User.getInstance().getSystemLanguage() == "fr" ? frenchMessage : englishMessage);
+            connectionErr.setTitle(User.getInstance().getSystemLanguage().equals("en") ? "Connection Error" : "Erreur de connexion");
+            connectionErr.setContentText(User.getInstance().getSystemLanguage().equals("fr") ? frenchMessage : englishMessage);
             connectionErr.showAndWait();
             System.out.println(e.getMessage());
         }finally {
@@ -170,7 +175,7 @@ public class addCustomerController {
     /**
      * Builds and returns a query string for the database. depending on if the customer is being edited or created.
      * @return String
-     * @throws SQLException
+     * @throws SQLException pretty self explanatory.
      */
     private String buildRequestString() throws SQLException {
 
@@ -184,22 +189,20 @@ public class addCustomerController {
         String Postal_Code = postalCodeText.getText();
         String Phone = customerPhoneText.getText();
         String Last_Updated_By = User.getInstance().getUserName();
-        LocalDateTime Last_Update = date;
         int Division_ID = divisionIdRes.getInt(1);
 
         if (!isEdit) {
-            LocalDateTime Create_Date = date;
             String Created_By = User.getInstance().getUserName();
 
             return String.format("insert into customers (Customer_ID, Customer_Name, Address, Postal_Code, Phone," +
                     " Create_Date, Created_By, Last_Update,Last_Updated_By, Division_ID)" +
                     "values(%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\", \"%s\", %d )", customer_ID, Customer_Name,
-                    Address, Postal_Code, Phone, Create_Date, Created_By, Last_Update, Last_Updated_By, Division_ID);
+                    Address, Postal_Code, Phone, date, Created_By, date, Last_Updated_By, Division_ID);
 
         }else{
             return String.format("update customers set Customer_Name = \"%s\", Address = \"%s\", Postal_Code = \"%s\", Phone = \"%s\"," +
                     " Last_Update = \"%s\", Last_Updated_By = \"%s\", Division_ID = %d  where Customer_ID = \"%s\"", Customer_Name, Address,
-                    Postal_Code, Phone, Last_Update, Last_Updated_By, Division_ID, customer_ID);
+                    Postal_Code, Phone, date, Last_Updated_By, Division_ID, customer_ID);
         }
     }
 
@@ -211,18 +214,18 @@ public class addCustomerController {
     private boolean checkEntry(){
         if(customerNameText.getText().isBlank() || customerPhoneText.getText().isBlank()) {
             Alert noEntry = new Alert(Alert.AlertType.ERROR);
-            noEntry.setTitle(User.getInstance().getSystemLanguage() == "fr" ? "Erreur de soumission" : "Submission Error");
+            noEntry.setTitle(User.getInstance().getSystemLanguage().equals("fr") ? "Erreur de soumission" : "Submission Error");
             String messageEnglish =  customerNameText.getText().isBlank() ? "Please enter a name." : "Please enter a phone number.";
             String messageFrench = customerNameText.getText().isBlank() ? "Veuillez saisir un nom." : "Veuillez saisir un numéro de téléphone.";
-            noEntry.setContentText(User.getInstance().getSystemLanguage() == "fr" ? messageFrench : messageEnglish);
+            noEntry.setContentText(User.getInstance().getSystemLanguage().equals("fr") ? messageFrench : messageEnglish);
             noEntry.show();
             return false;
         }else if(countryDropDown.getValue() == null || countryDropDown.getValue() == null) {
             Alert noSelection = new Alert(Alert.AlertType.ERROR);
-            noSelection.setTitle(User.getInstance().getSystemLanguage() == "fr" ? "Erreur de soumission" : "Submission Error");
+            noSelection.setTitle(User.getInstance().getSystemLanguage().equals("fr") ? "Erreur de soumission" : "Submission Error");
             String messageEnglish =countryDropDown.getValue() == null ? "Please select Country and state.": "Please select a state.";
             String messageFrench = countryDropDown.getValue() == null ? "Veuillez sélectionner le pays et la province." : "Veuillez sélectionner une province.";
-            noSelection.setContentText(User.getInstance().getSystemLanguage() == "fr" ? messageFrench : messageEnglish);
+            noSelection.setContentText(User.getInstance().getSystemLanguage().equals("fr") ? messageFrench : messageEnglish);
             noSelection.show();
             return false;
         }else {
@@ -237,7 +240,7 @@ public class addCustomerController {
      * @return String
      */
     private String formatAddress(){
-        if(countryDropDown.getValue().toString() == "US" || countryDropDown.getValue().toString() == "Uk" ){
+        if(countryDropDown.getValue().toString().equals("U.S") || countryDropDown.getValue().toString().equals("Uk") ){
             return String.format("%s, %s", customerAddText.getText(), stateDropDown.getValue().toString());
         }else{
             return String.format("%s, %s, %s", customerAddText.getText(), stateDropDown.getValue().toString(), countryDropDown.getValue().toString() );
@@ -271,7 +274,7 @@ public class addCustomerController {
 
     /**
      * Closes the add customer form.
-     * @param mouseEvent
+     * @param mouseEvent the event that happened as an object with several parameters, such as the name.
      */
     public void addCustomerCancel(MouseEvent mouseEvent) throws SQLException {
         mouseEvent.consume();

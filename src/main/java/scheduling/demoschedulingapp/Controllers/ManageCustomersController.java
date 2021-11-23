@@ -15,12 +15,10 @@ import scheduling.demoschedulingapp.Classes.Customer;
 import scheduling.demoschedulingapp.Classes.User;
 import scheduling.demoschedulingapp.SchedulingApplication;
 
-
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Optional;
 
 
@@ -43,11 +41,11 @@ public class ManageCustomersController {
     @FXML
     public void initialize() {
         setLanguage();
-        customer_id.setCellValueFactory(new PropertyValueFactory<Customer, String>("customer_id"));
-        name.setCellValueFactory(new PropertyValueFactory<Customer, String>("name"));
-        create_date.setCellValueFactory(new PropertyValueFactory<Customer, String>("create_date"));
-        phone.setCellValueFactory(new PropertyValueFactory<Customer, String>("phone"));
-        lastUpdate.setCellValueFactory(new PropertyValueFactory<Customer, String>("lastUpdate"));
+        customer_id.setCellValueFactory(new PropertyValueFactory<>("customer_id"));
+        name.setCellValueFactory(new PropertyValueFactory<>("name"));
+        create_date.setCellValueFactory(new PropertyValueFactory<>("create_date"));
+        phone.setCellValueFactory(new PropertyValueFactory<>("phone"));
+        lastUpdate.setCellValueFactory(new PropertyValueFactory<>("lastUpdate"));
         buildCustomerList();
         fillTable();
     }
@@ -57,14 +55,14 @@ public class ManageCustomersController {
      * contains lambda.
      */
     private void setLanguage(){
-        HashMap<Button, String> frenchBtns= new HashMap<Button, String>(){
+        HashMap<Button, String> frenchBtns= new HashMap<>(){
             {
                 put(add_customer, "Ajouter un client");
                 put(edit_customer, "Éditer un client");
                 put(delete_customer, "effacer un client");
             }
         };
-        HashMap<TableColumn<Customer, String>, String> frenchLables = new HashMap<TableColumn<Customer, String>, String>(){
+        HashMap<TableColumn<Customer, String>, String> frenchLables = new HashMap<>(){
             {
                 put(customer_id, "N ° de client");
                 put(name,"Nom");
@@ -74,7 +72,7 @@ public class ManageCustomersController {
             }
         };
 
-        if(Locale.getDefault().getLanguage() == "fr"){
+        if(User.getInstance().getSystemLanguage().equals("fr")){
             frenchBtns.forEach((k,v)-> k.setText(v));
             frenchLables.forEach((k,v) -> k.setText(v));
         }
@@ -126,8 +124,6 @@ public class ManageCustomersController {
 
     /**
      * opens the add customer form.
-     *
-     * @throws IOException
      */
     public void openAddCustomer() {
         try {
@@ -151,8 +147,8 @@ public class ManageCustomersController {
             String messageEnglish = "Please select a customer to edit.";
             String messageFrench = "Veuillez sélectionner un client à modifier.";
             Alert noneSelected = new Alert(Alert.AlertType.ERROR);
-            noneSelected.setTitle(User.getInstance().getSystemLanguage() == "en" ? "No Customer Selected." : "Aucun client sélectionné.");
-            noneSelected.setContentText(User.getInstance().getSystemLanguage() == "en" ? messageEnglish : messageFrench);
+            noneSelected.setTitle(User.getInstance().getSystemLanguage().equals("en") ? "No Customer Selected." : "Aucun client sélectionné.");
+            noneSelected.setContentText(User.getInstance().getSystemLanguage().equals("en") ? messageEnglish : messageFrench);
             noneSelected.showAndWait();
             return;
         }
@@ -181,8 +177,8 @@ public class ManageCustomersController {
             String messageEnglish = "Please select a customer to Delete.";
             String messageFrench = "Veuillez sélectionner un client à Effacer.";
             Alert noneSelected = new Alert(Alert.AlertType.ERROR);
-            noneSelected.setTitle(User.getInstance().getSystemLanguage() == "en" ? "No Customer Selected." : "Aucun client sélectionné.");
-            noneSelected.setContentText(User.getInstance().getSystemLanguage() == "en" ? messageEnglish : messageFrench);
+            noneSelected.setTitle(User.getInstance().getSystemLanguage().equals("en") ? "No Customer Selected." : "Aucun client sélectionné.");
+            noneSelected.setContentText(User.getInstance().getSystemLanguage().equals("en") ? messageEnglish : messageFrench);
             noneSelected.showAndWait();
             return;
         }
@@ -190,8 +186,8 @@ public class ManageCustomersController {
         String messageEnglish = "Customer will be deleted as well as any appointments associated with this customer. Do you wish to proceed?";
         String messageFrench = "Le client sera supprimé ainsi que tous les rendez-vous associés à ce client. Voulez-vous continuer?";
         Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmation.setTitle(User.getInstance().getSystemLanguage() == "en" ? "Delete Customer" : "Supprimer le client");
-        confirmation.setContentText(User.getInstance().getSystemLanguage() == "en"  ? messageEnglish : messageFrench);
+        confirmation.setTitle(User.getInstance().getSystemLanguage().equals("en") ? "Delete Customer" : "Supprimer le client");
+        confirmation.setContentText(User.getInstance().getSystemLanguage().equals("en")  ? messageEnglish : messageFrench);
         Optional<ButtonType> confirmed = confirmation.showAndWait();
 
         if(confirmed.isPresent() && confirmed.get() == ButtonType.OK){
@@ -202,10 +198,7 @@ public class ManageCustomersController {
             }catch(SQLException e){
                 System.out.println(e.getMessage());
             }
-        }else {
-            return;
         }
-
 
     }
 
