@@ -41,6 +41,8 @@ public class MainController {
             case "addCustomerController":
                 ManageCustomersController.buildCustomerList();
                 break;
+            case "AddAppointmentController":
+                ManageAppointmentsController.buildAppointmentList();
             default:
                 return;
         }

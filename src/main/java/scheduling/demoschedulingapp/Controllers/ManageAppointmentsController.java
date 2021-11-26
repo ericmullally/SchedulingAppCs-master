@@ -100,7 +100,7 @@ public class ManageAppointmentsController {
                String end = answer.getString("End");
                String createDate = answer.getString("Create_Date");
                String createdBy = answer.getString("Created_By");
-               String lastUpdate = answer.getString("Last_Updated");
+               String lastUpdate = answer.getString("Last_Update");
                String lastUpdatedBy = answer.getString("Last_Updated_By");
                int customerID = answer.getInt("Customer_ID");
                int userID = answer.getInt("User_ID");

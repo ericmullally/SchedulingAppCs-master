@@ -12,14 +12,14 @@
     <children>
         <TableView fx:id="appointmentTable" layoutY="77.0" prefHeight="265.0" prefWidth="780.0" styleClass="table" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
             <columns>
-                <TableColumn fx:id="appointmentIdCol" prefWidth="103.0" text="Appointment ID" />
-                <TableColumn fx:id="titleCol" prefWidth="87.0" text="Title" />
-                <TableColumn fx:id="descriptionCol" prefWidth="109.0" text="Description" />
-                <TableColumn fx:id="startCol" prefWidth="68.0" text="Start" />
-                <TableColumn fx:id="endCol" prefWidth="94.0" text="End" />
-                <TableColumn fx:id="locationCol" prefWidth="85.0" text="Location" />
-                <TableColumn fx:id="customerIdCol" prefWidth="120.0" text="Customer ID" />
-                <TableColumn fx:id="contactIDCol" prefWidth="113.0" text="Contact Id" />
+                <TableColumn fx:id="appointmentIdCol" editable="false" prefWidth="102.0" text="Appointment ID" />
+                <TableColumn fx:id="titleCol" prefWidth="91.0" text="Title" />
+                <TableColumn fx:id="descriptionCol" prefWidth="121.0" text="Description" />
+                <TableColumn fx:id="startCol" prefWidth="81.0" text="Start" />
+                <TableColumn fx:id="endCol" prefWidth="113.0" text="End" />
+                <TableColumn fx:id="locationCol" prefWidth="96.0" text="Location" />
+                <TableColumn fx:id="customerIdCol" prefWidth="84.0" text="Customer ID" />
+                <TableColumn fx:id="contactIDCol" prefWidth="91.0" text="Contact Id" />
             </columns>
         </TableView>
         <ButtonBar layoutY="14.0" prefHeight="40.0" prefWidth="780.0" style="-fx-background-color: black;" AnchorPane.bottomAnchor="271.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="14.0">
