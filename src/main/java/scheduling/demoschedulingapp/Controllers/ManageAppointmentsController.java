@@ -3,14 +3,21 @@ package scheduling.demoschedulingapp.Controllers;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import scheduling.demoschedulingapp.Classes.Appointment;
 import scheduling.demoschedulingapp.Classes.Customer;
 import scheduling.demoschedulingapp.Classes.User;
+import scheduling.demoschedulingapp.SchedulingApplication;
 
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -122,8 +129,21 @@ public class ManageAppointmentsController {
         }
     }
 
+    /**
+     * Opens the add Appointment window.
+     */
     public void openAddAppointment(){
-
+        try {
+            String title = User.getInstance().getSystemLanguage().equals("en") ? "Add Appointment" : "Ajouter un rendez-vous";
+            Parent loader = FXMLLoader.load(SchedulingApplication.class.getResource("addAppointment.fxml"));
+            Stage addWindow = new Stage();
+            addWindow.setScene(new Scene(loader));
+            addWindow.setTitle(title);
+            addWindow.initModality(Modality.APPLICATION_MODAL);
+            addWindow.show();
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
 }

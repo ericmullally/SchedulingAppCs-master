@@ -13,6 +13,11 @@
                         <fx:include source="manageCustomers.fxml" />
                     </content>
                 </Tab>
+                <Tab fx:id="viewAppointmentsTab" text="View Appointments">
+                  <content>
+                    <fx:include source="viewAppointments.fxml"/>
+                  </content>
+                </Tab>
                 <Tab fx:id="manageAppointmentTabLbl" text="Manage Appointments">
                     <content>
                         <fx:include source="manageAppointments.fxml" />

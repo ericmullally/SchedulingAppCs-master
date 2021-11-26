@@ -28,7 +28,7 @@ public class LoginController {
     @FXML
     public void initialize(){
         dbUtils.establishConnection();
-        regionLbl.setText(Locale.getDefault().getCountry() +" " + Calendar.getInstance().getTimeZone().getDisplayName());
+        regionLbl.setText(String.format(" %s  TimeZone: %s",Locale.getDefault().getCountry(),User.getInstance().getUserTimeZone() ));
         setLanguage();
     }
 
@@ -94,7 +94,7 @@ public class LoginController {
             }
         };
 
-        if(User.getInstance().getSystemLanguage() == "fr"){
+        if(User.getInstance().getSystemLanguage().equals("fr")){
             FrenchLogin.forEach((k,v) -> k.setText(v) );
             loginBtn.setText("connexion");
             exitBtn.setText("Annuler");

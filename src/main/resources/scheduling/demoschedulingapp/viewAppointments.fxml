@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane fx:id="viewAppointmentTab" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="325.0" prefWidth="780.0" styleClass="anchor" stylesheets="@../../Styles/stage.css" fx:controller="scheduling.demoschedulingapp.Controllers.ViewAppointmentsController" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" >
+   <children>
+      <RadioButton fx:id="viewAll" layoutX="108.0" layoutY="27.0" mnemonicParsing="false" prefHeight="17.0" prefWidth="87.0" styleClass="tab-label" text="View all">
+         <toggleGroup>
+            <ToggleGroup fx:id="view" />
+         </toggleGroup>
+      </RadioButton>
+      <RadioButton fx:id="viewWeek" layoutX="539.0" layoutY="27.0" mnemonicParsing="false" styleClass="tab-label" text="View week" toggleGroup="$view" />
+      <RadioButton fx:id="viewMonth" layoutX="315.0" layoutY="27.0" mnemonicParsing="false" styleClass="tab-label" text="View Month" toggleGroup="$view" />
+      <TableView fx:id="viewAppTable" layoutX="1.0" layoutY="65.0" prefHeight="260.0" prefWidth="780.0" styleClass="table" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="65.0">
+        <columns>
+          <TableColumn fx:id="appointmentIDCol" prefWidth="114.0" text="Appointment ID" />
+          <TableColumn fx:id="titleCol" prefWidth="66.0" text="Title" />
+            <TableColumn fx:id="descriptCol" prefWidth="79.0" text="Description" />
+            <TableColumn fx:id="locCol" prefWidth="61.0" text="Location" />
+            <TableColumn fx:id="contCol" prefWidth="73.0" text="Contact" />
+            <TableColumn fx:id="typeCol" prefWidth="57.0" text="Type" />
+            <TableColumn fx:id="startCol" prefWidth="75.0" text="Start" />
+            <TableColumn fx:id="endCol" prefWidth="75.0" text="End" />
+            <TableColumn fx:id="cusIdCol" prefWidth="75.0" text="Customer ID" />
+            <TableColumn fx:id="userIdCol" prefWidth="104.0" text="User ID" />
+        </columns>
+      </TableView>
+   </children>
+</AnchorPane>
