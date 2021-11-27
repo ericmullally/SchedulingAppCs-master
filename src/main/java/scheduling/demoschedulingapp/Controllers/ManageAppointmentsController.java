@@ -6,9 +6,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -22,6 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Optional;
 
 
 public class ManageAppointmentsController {
@@ -146,4 +145,78 @@ public class ManageAppointmentsController {
         }
     }
 
+    /**
+     * Opens the add appointment form in edit mode.
+     */
+    public void openEditAppointments() {
+        Appointment selectedAppointment = appointmentTable.getSelectionModel().getSelectedItem();
+        if(selectedAppointment == null){
+            String messageEnglish = "Please select an Appointment to edit.";
+            Alert noneSelected = new Alert(Alert.AlertType.ERROR);
+            noneSelected.setTitle( "No Appointment Selected.");
+            noneSelected.setContentText(messageEnglish);
+            noneSelected.showAndWait();
+            return;
+        }
+        try {
+            FXMLLoader loader = new FXMLLoader(SchedulingApplication.class.getResource("addAppointment.fxml"));
+            Parent root = loader.load();
+            AddAppointmentController controller =  loader.getController();
+            controller.makeEdit(selectedAppointment);
+
+            Stage addWindow = new Stage();
+            addWindow.setScene(new Scene(root));
+            addWindow.setTitle("Edit Appointment");
+            addWindow.initModality(Modality.APPLICATION_MODAL);
+            addWindow.show();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    /**
+     * Removes the selected appointment from the database.
+     */
+    public void deleteAppointment(){
+        Appointment selectedAppointment = appointmentTable.getSelectionModel().getSelectedItem();
+        if(selectedAppointment == null){
+            String messageEnglish = "Please select an Appointment to delete.";
+            Alert noneSelected = new Alert(Alert.AlertType.ERROR);
+            noneSelected.setTitle( "No Appointment Selected.");
+            noneSelected.setContentText(messageEnglish);
+            noneSelected.showAndWait();
+            return;
+        }
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Confirmation");
+        confirm.setContentText(String.format("Are you sure you want to delete appointment: %s", selectedAppointment.getTitle()));
+        Optional<ButtonType> response = confirm.showAndWait();
+
+        if(response.isPresent() && response.equals(ButtonType.OK)){
+            dbUtils.establishConnection();
+            try{
+                dbUtils.connStatement.execute(String.format("delete from appointments where Appointment_ID = %d", selectedAppointment.getAppointmentID()));
+                dbUtils.connStatement.close();
+                buildAppointmentList();
+            }catch (SQLException e){
+                System.out.println(e.getMessage());
+            }
+        }
+
+
+    }
+
+    /**
+     * Deletes all appointments associated with the customer that is passed in.
+     * @param customer customer who's appointments are to  be removed.
+     */
+    public static void deleteAssociatedAppointments(Customer customer){
+        dbUtils.establishConnection();
+        try{
+            dbUtils.connStatement.execute(String.format("delete from appointments where Customer_ID = %d", customer.getCustomer_id()));
+        }catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+    }
 }

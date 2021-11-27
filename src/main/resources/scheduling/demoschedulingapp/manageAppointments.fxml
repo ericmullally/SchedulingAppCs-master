@@ -30,13 +30,13 @@
                         <String fx:value="show_btn" />
                     </styleClass>
                 </Button>
-                <Button fx:id="editAppointmentBtn" mnemonicParsing="false" text="Edit Appointment">
+                <Button fx:id="editAppointmentBtn" mnemonicParsing="false" onAction="#openEditAppointments" text="Edit Appointment">
                     <styleClass>
                         <String fx:value="btn" />
                         <String fx:value="show_btn" />
                     </styleClass>
                 </Button>
-                <Button fx:id="deleteAppointmentBtn" mnemonicParsing="false" text="Delete Appointment">
+                <Button fx:id="deleteAppointmentBtn" mnemonicParsing="false" onAction="#deleteAppointment" text="Delete Appointment">
                     <styleClass>
                         <String fx:value="btn" />
                         <String fx:value="show_btn" />

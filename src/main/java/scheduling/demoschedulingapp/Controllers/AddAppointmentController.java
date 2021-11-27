@@ -1,23 +1,17 @@
 package scheduling.demoschedulingapp.Controllers;
 
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableArray;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.input.KeyCode;
-
 
 import javafx.stage.Stage;
+import scheduling.demoschedulingapp.Classes.Appointment;
 import scheduling.demoschedulingapp.Classes.User;
 
-import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.*;
-import java.time.chrono.ChronoLocalDateTime;
-import java.time.temporal.TemporalField;
-import java.util.Arrays;
 import java.util.HashMap;
 
 
@@ -49,6 +43,28 @@ public class AddAppointmentController {
         setTimeBoxes();
         setContactBox();
         appointmentIdTxt.setText(String.valueOf(appointmentID));
+    }
+
+    public void makeEdit(Appointment app){
+        isEdit = true;
+        appointmentID = app.getAppointmentID();
+        String[] startDateArray = app.getStart().split(" ");
+        String[] endDateArray = app.getEnd().split(" ");
+        int sHour = Integer.parseInt(startDateArray[1].split(":")[0]);
+        int sMin = Integer.parseInt(startDateArray[1].split(":")[1]);
+        int eHour = Integer.parseInt(endDateArray[1].split(":")[0]);
+        int eMin = Integer.parseInt(startDateArray[1].split(":")[1]);
+
+        titleTxt.setText(app.getTitle());
+        descTxt.setText(app.getDescription());
+        cusNameBox.getSelectionModel().select(getName("Customer_Name", "customers", "Customer_ID", app.getCustomerID()));
+        contactBox.getSelectionModel().select(getName("Contact_Name", "contacts", "Contact_ID", app.getContactID()));
+        locationTxt.setText(app.getLocation());
+        typeTxt.setText(app.getType());
+        datePic.setValue(LocalDate.parse(startDateArray[0]));
+        setTimeBoxes(sHour, sMin, eHour, eMin);
+
+
     }
 
     /**
@@ -135,6 +151,37 @@ public class AddAppointmentController {
     }
 
     /**
+     * sets value factory for all time spinners and uses filter
+     * on event handler to ensure only numbers are set.
+     */
+    private void setTimeBoxes(int sHour, int sMin, int eHour, int eMin){
+        SpinnerValueFactory<Integer> startHours = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 24);
+        SpinnerValueFactory<Integer> startMinutes = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59);
+        SpinnerValueFactory<Integer> endHours = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 24);
+        SpinnerValueFactory<Integer> endMinutes = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59);
+        startHours.setValue(sHour);
+        startMinutes.setValue(sMin);
+        endHours.setValue(eHour);
+        endMinutes.setValue(eMin);
+
+        startSpinnerHr.setValueFactory(startHours);
+        startSpinnerMin.setValueFactory(startMinutes);
+        endSpinnerHr.setValueFactory(endHours);
+        endSpinnerMin.setValueFactory(endMinutes);
+        String numberPattern = "\\d*";
+
+        ObservableList<Spinner> spinners = FXCollections.observableArrayList(startSpinnerHr, startSpinnerMin, endSpinnerHr, endSpinnerMin);
+
+        spinners.forEach(spinner-> spinner.getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
+                    if(!newValue.matches(numberPattern)){
+                        spinner.getEditor().setText(oldValue);
+                    }
+                })
+        );
+
+    }
+
+    /**
      * sets the contact dropdown box.
      */
     private void setContactBox(){
@@ -172,7 +219,8 @@ public class AddAppointmentController {
             dbUtils.connStatement.close();
             Alert success = new Alert(Alert.AlertType.CONFIRMATION);
             success.setTitle("Success!");
-            success.setContentText(String.format("Appointment %s has been added to the schedule.", title));
+            String message = isEdit ? String.format("Appointment %s has been updated.", title) : String.format("Appointment %s has been added to the schedule.", title);
+            success.setContentText(message);
             success.show();
 
             Stage stage = (Stage) cancelBtn.getScene().getWindow();
@@ -208,15 +256,22 @@ public class AddAppointmentController {
         int customerID = ids.get(0);
         int contactID = ids.get(1);
         int userID = ids.get(2);
+        if(!isEdit){
+            return String.format( "insert into appointments (Appointment_ID, Title, Description, Location, " +
+                            "Type, Start, End, Create_Date, Created_By, Last_Update," +
+                            "Last_Updated_By, Customer_ID, User_ID, Contact_ID)" +
+                            "values(%d, \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\"," +
+                            "\"%s\", \"%s\", \"%s\", \"%s\", %d, %d, %d )", appointmentID, title,
+                    description, location, type, start, end, createdDate,
+                    createdBy, lastUpdate, lastUpdatedBy,
+                    customerID, userID, contactID);
+        }else{
+            return String.format( "update  appointments set  Title =\"%s\", Description =\"%s\", Location =\"%s\", " +
+                            "Type = \"%s\", Start =\"%s\", End =\"%s\", Last_Update =\"%s\"," +
+                            "Last_Updated_By = \"%s\", Customer_ID = %d, User_ID = %d, Contact_ID = %d where Appointment_ID = %d", title,
+                            description, location, type, start, end, lastUpdate, lastUpdatedBy, customerID, userID, contactID, appointmentID);
+        }
 
-        return String.format( "insert into appointments (Appointment_ID, Title, Description, Location, " +
-                        "Type, Start, End, Create_Date, Created_By, Last_Update," +
-                        "Last_Updated_By, Customer_ID, User_ID, Contact_ID)" +
-                        "values(%d, \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\"," +
-                        "\"%s\", \"%s\", \"%s\", \"%s\", %d, %d, %d )", appointmentID, title,
-                description, location, type, start, end, createdDate,
-                createdBy, lastUpdate, lastUpdatedBy,
-                customerID, userID, contactID);
 
     }
 
@@ -261,17 +316,24 @@ public class AddAppointmentController {
                     " Customer_Name = \"%s\"", cusNameBox.getValue()));
             customerIdRes.next();
             int customerID = customerIdRes.getInt("Customer_ID");
-            ResultSet customerAppointmentsRes = dbUtils.connStatement.executeQuery(String.format("select Start, End from appointments " +
+            ResultSet customerAppointmentsRes = dbUtils.connStatement.executeQuery(String.format("select Start, End, Appointment_ID from appointments " +
                                                                                                         "where Customer_ID = %s", customerID));
             while (customerAppointmentsRes.next()) {
-                LocalDateTime start = customerAppointmentsRes.getDate("Start").toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-                LocalDateTime end = customerAppointmentsRes.getDate("End").toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-                if (enteredStart.isAfter(start) || enteredEnd.isBefore(end)) {
-                    Alert scheduleError = new Alert(Alert.AlertType.ERROR);
-                    scheduleError.setTitle("Conflicting appointment");
-                    scheduleError.setContentText(String.format("%s Already has an appointment within this time frame.", cusNameBox.getValue()));
-                    scheduleError.showAndWait();
-                    return true;
+                LocalDateTime start = LocalDateTime.parse(customerAppointmentsRes.getString("Start").replace(" ", "T"));
+                LocalDateTime end = LocalDateTime.parse(customerAppointmentsRes.getString("End").replace(" ", "T"));
+
+                if(start.getDayOfYear() == enteredStart.getDayOfYear() ){
+                    Boolean startOverlap = enteredStart.toLocalTime().isBefore(end.toLocalTime());
+                    Boolean endOverlap = end.toLocalTime().isAfter(enteredStart.toLocalTime());
+                    Boolean differentAppointment = customerAppointmentsRes.getInt("Appointment_ID") != appointmentID;
+
+                    if (( startOverlap || endOverlap ) && differentAppointment) {
+                        Alert scheduleError = new Alert(Alert.AlertType.ERROR);
+                        scheduleError.setTitle("Conflicting appointment");
+                        scheduleError.setContentText(String.format("%s Already has an appointment within this time frame.", cusNameBox.getValue()));
+                        scheduleError.showAndWait();
+                        return true;
+                    }
                 }
             }
             customerAppointmentsRes.close();
@@ -342,5 +404,19 @@ public class AddAppointmentController {
     public void cancelAdd(){
         Stage stage = (Stage) cancelBtn.getScene().getWindow();
         stage.close();
+    }
+
+    private String getName( String columnName, String tableName, String typeID, int id){
+        dbUtils.establishConnection();
+        String name = "";
+        try{
+            ResultSet nameRes = dbUtils.connStatement.executeQuery(String.format("select %s from %s where %s = %s", columnName, tableName, typeID, id));
+            nameRes.next();
+            name = nameRes.getString(columnName);
+            nameRes.close();
+        }catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return name;
     }
 }

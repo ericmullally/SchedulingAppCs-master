@@ -169,7 +169,7 @@ public class ManageCustomersController {
     }
 
     /**
-     * Must be adjusted to delete all customer appointments once the appoinment manager is completed.
+     * Deletes the selected customer and all associated Appointments.
      */
     public void deleteCustomer() {
         Customer selectedCustomer = customer_table.getSelectionModel().getSelectedItem();
@@ -192,6 +192,7 @@ public class ManageCustomersController {
 
         if(confirmed.isPresent() && confirmed.get() == ButtonType.OK){
             try{
+                ManageAppointmentsController.deleteAssociatedAppointments(selectedCustomer);
                 dbUtils.establishConnection();
                 dbUtils.connStatement.execute(String.format("delete from customers where Customer_ID = \"%s\"", selectedCustomer.getCustomer_id()));
                 buildCustomerList();
