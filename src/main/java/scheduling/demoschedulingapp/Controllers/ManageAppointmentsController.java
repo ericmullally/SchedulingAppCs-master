@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Optional;
 
 
@@ -193,11 +192,13 @@ public class ManageAppointmentsController {
         confirm.setContentText(String.format("Are you sure you want to delete appointment: %s", selectedAppointment.getTitle()));
         Optional<ButtonType> response = confirm.showAndWait();
 
-        if(response.isPresent() && response.equals(ButtonType.OK)){
+        if(response.isPresent() && response.get() == ButtonType.OK){
             dbUtils.establishConnection();
             try{
                 dbUtils.connStatement.execute(String.format("delete from appointments where Appointment_ID = %d", selectedAppointment.getAppointmentID()));
                 dbUtils.connStatement.close();
+                String[] className = this.getClass().getName().split("\\.");
+                MainController.refreshList(className[className.length -1 ]);
                 buildAppointmentList();
             }catch (SQLException e){
                 System.out.println(e.getMessage());

@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane fx:id="viewAppointmentTab" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="325.0" prefWidth="780.0" styleClass="anchor" stylesheets="@../../Styles/stage.css" fx:controller="scheduling.demoschedulingapp.Controllers.ViewAppointmentsController" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" >
+<AnchorPane fx:id="viewAppointmentTab" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="325.0" prefWidth="780.0" styleClass="anchor" stylesheets="@../../Styles/stage.css" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="scheduling.demoschedulingapp.Controllers.ViewAppointmentsController">
    <children>
-      <RadioButton fx:id="viewAll" layoutX="108.0" layoutY="27.0" mnemonicParsing="false" prefHeight="17.0" prefWidth="87.0" styleClass="tab-label" text="View all">
+      <RadioButton fx:id="viewAll" layoutX="108.0" layoutY="27.0" mnemonicParsing="false" onAction="#handleChange" prefHeight="17.0" prefWidth="87.0" styleClass="tab-label" text="View all">
          <toggleGroup>
             <ToggleGroup fx:id="view" />
          </toggleGroup>
       </RadioButton>
-      <RadioButton fx:id="viewWeek" layoutX="539.0" layoutY="27.0" mnemonicParsing="false" styleClass="tab-label" text="View week" toggleGroup="$view" />
-      <RadioButton fx:id="viewMonth" layoutX="315.0" layoutY="27.0" mnemonicParsing="false" styleClass="tab-label" text="View Month" toggleGroup="$view" />
-      <TableView fx:id="viewAppTable" layoutX="1.0" layoutY="65.0" prefHeight="260.0" prefWidth="780.0" styleClass="table" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="65.0">
+      <RadioButton fx:id="viewWeek" layoutX="539.0" layoutY="27.0" mnemonicParsing="false" onAction="#handleChange" styleClass="tab-label" text="View week" toggleGroup="$view" />
+      <RadioButton fx:id="viewMonth" layoutX="315.0" layoutY="27.0" mnemonicParsing="false" onAction="#handleChange" styleClass="tab-label" text="View Month" toggleGroup="$view" />
+      <TableView fx:id="viewAppTable" layoutX="1.0" layoutY="65.0" prefWidth="780.0" styleClass="table" AnchorPane.bottomAnchor="-8.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="65.0">
         <columns>
           <TableColumn fx:id="appointmentIDCol" prefWidth="114.0" text="Appointment ID" />
           <TableColumn fx:id="titleCol" prefWidth="66.0" text="Title" />
@@ -29,5 +30,6 @@
             <TableColumn fx:id="userIdCol" prefWidth="104.0" text="User ID" />
         </columns>
       </TableView>
+      <Button fx:id="refreshBtn" layoutX="662.0" layoutY="23.0" mnemonicParsing="false" onAction="#handleChange" text="Button" />
    </children>
 </AnchorPane>

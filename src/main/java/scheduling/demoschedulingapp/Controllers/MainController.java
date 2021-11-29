@@ -43,6 +43,9 @@ public class MainController {
                 break;
             case "AddAppointmentController":
                 ManageAppointmentsController.buildAppointmentList();
+                break;
+            case "ManageAppointmentsController":
+                break;
             default:
                 return;
         }

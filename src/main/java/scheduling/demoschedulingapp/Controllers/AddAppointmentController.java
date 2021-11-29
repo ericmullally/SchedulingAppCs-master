@@ -18,9 +18,9 @@ import java.util.HashMap;
 public class AddAppointmentController {
 
     @FXML
-    TextField appointmentIdTxt, typeTxt, titleTxt, locationTxt;
+    TextField appointmentIdTxt, titleTxt, locationTxt;
     @FXML
-    ChoiceBox cusNameBox, contactBox;
+    ChoiceBox cusNameBox, contactBox, typeBox;
     @FXML
     Spinner<Integer> startSpinnerHr, startSpinnerMin, endSpinnerHr, endSpinnerMin;
     @FXML
@@ -40,6 +40,7 @@ public class AddAppointmentController {
         setLanguage();
         setAppointmentId();
         setCustomerNamesBox();
+        setTypeBox();
         setTimeBoxes();
         setContactBox();
         appointmentIdTxt.setText(String.valueOf(appointmentID));
@@ -60,7 +61,7 @@ public class AddAppointmentController {
         cusNameBox.getSelectionModel().select(getName("Customer_Name", "customers", "Customer_ID", app.getCustomerID()));
         contactBox.getSelectionModel().select(getName("Contact_Name", "contacts", "Contact_ID", app.getContactID()));
         locationTxt.setText(app.getLocation());
-        typeTxt.setText(app.getType());
+        typeBox.getSelectionModel().select(app.getType());
         datePic.setValue(LocalDate.parse(startDateArray[0]));
         setTimeBoxes(sHour, sMin, eHour, eMin);
 
@@ -187,7 +188,6 @@ public class AddAppointmentController {
     private void setContactBox(){
         dbUtils.establishConnection();
         ObservableList<String> contacts = FXCollections.observableArrayList();
-
         try{
             ResultSet contactResults = dbUtils.connStatement.executeQuery("select * from contacts");
             while(contactResults.next()){
@@ -198,6 +198,14 @@ public class AddAppointmentController {
             System.out.println(e.getMessage());
         }
         contacts.forEach(item -> contactBox.getItems().add(item));
+    }
+
+    /**
+     * sets the contact dropdown box.
+     */
+    private void setTypeBox(){
+        ObservableList<String> types = FXCollections.observableArrayList("Stand up", "Sit Down", "Scrum", "Interview");
+        types.forEach(item -> typeBox.getItems().add(item));
     }
 
     /**
@@ -244,7 +252,7 @@ public class AddAppointmentController {
         String title = titleTxt.getText();
         String description = descTxt.getText();
         String location = locationTxt.getText();
-        String type = typeTxt.getText();
+        String type = typeBox.getValue().toString();
         LocalDateTime start =  LocalDateTime.of(datePic.getValue(), LocalTime.of(startSpinnerHr.getValue(),
                 startSpinnerMin.getValue())).plusSeconds(utcTime.getOffset().getTotalSeconds());
         LocalDateTime end = LocalDateTime.of(datePic.getValue(), LocalTime.of(endSpinnerHr.getValue(),
@@ -280,12 +288,18 @@ public class AddAppointmentController {
      * @return false if there is an error true otherwise.
      */
     private Boolean checkFields(){
-        if(cusNameBox.getValue() == null || contactBox.getValue() == null){
+        if(cusNameBox.getValue() == null || contactBox.getValue() == null || typeBox.getValue() == null){
+            String message = "";
+            if(cusNameBox.getValue() == null ){
+                message = "Please Select a customer.";
+            }else if(contactBox.getValue() == null){
+                message = "Please select a contact.";
+            }else{
+                message = "Please select a type.";
+            }
             Alert error = new Alert(Alert.AlertType.ERROR);
-            String frenchMessage =  cusNameBox.getValue() == null ? "Veuillez sélectionner un client.":"Veuillez sélectionner un contact.";
-            String englishMessage =  cusNameBox.getValue() == null ? "Please select a customer." : "Please select a contact.";
-            error.setTitle(User.getInstance().getSystemLanguage().equals("en") ?  "Submission Error" : "Erreur de soumission");
-            error.setContentText(User.getInstance().getSystemLanguage().equals("en") ? englishMessage : frenchMessage);
+            error.setTitle("Submission Error" );
+            error.setContentText(message);
             error.show();
             return true;
         }else{
@@ -304,11 +318,20 @@ public class AddAppointmentController {
         ZoneOffset cooperateOffset = ZonedDateTime.of(LocalDateTime.now(ZoneId.of("US/Eastern")), ZoneId.of("US/Eastern")).getOffset();
         LocalTime businessStart = LocalTime.of(8, 00).plusSeconds(cooperateOffset.getTotalSeconds());
         LocalTime businessEnd = LocalTime.of(22, 00).plusSeconds(cooperateOffset.getTotalSeconds());
+        LocalDate today = LocalDate.now();
 
         LocalDate enteredDate = LocalDate.of(datePic.getValue().getYear(), datePic.getValue().getMonth(), datePic.getValue().getDayOfMonth());
         LocalDateTime enteredStart = LocalDateTime.of(enteredDate, LocalTime.of(startSpinnerHr.getValue(), startSpinnerMin.getValue()));
         LocalDateTime enteredEnd = LocalDateTime.of(enteredDate, LocalTime.of(endSpinnerHr.getValue(), endSpinnerMin.getValue()));
         DayOfWeek appointmentDay = datePic.getValue().getDayOfWeek();
+
+        if(today.isAfter(enteredDate)){
+            Alert dayError = new Alert(Alert.AlertType.ERROR);
+            dayError.setContentText("Incorrect Day");
+            dayError.setContentText("The day you have selected has already passed.");
+            dayError.show();
+            return true;
+        }
 
         try {
 
