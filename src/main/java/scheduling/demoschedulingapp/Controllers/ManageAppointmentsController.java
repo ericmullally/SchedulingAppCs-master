@@ -37,14 +37,22 @@ public class ManageAppointmentsController {
     @FXML
     public void initialize(){
         setLanguage();
-        appointmentIdCol.setCellValueFactory(new PropertyValueFactory<Appointment, String>("appointmentID"));
-        titleCol.setCellValueFactory(new PropertyValueFactory<Appointment, String>("title"));
-        descriptionCol.setCellValueFactory(new PropertyValueFactory<Appointment, String>("description"));
-        startCol.setCellValueFactory(new PropertyValueFactory<Appointment, String>("start"));
-        endCol.setCellValueFactory(new PropertyValueFactory<Appointment, String>("end"));
-        locationCol.setCellValueFactory(new PropertyValueFactory<Appointment, String>("location"));
-        customerIdCol.setCellValueFactory(new PropertyValueFactory<Appointment, String>("customerID"));
-        contactIDCol.setCellValueFactory(new PropertyValueFactory<Appointment, String>("contactID"));
+        appointmentIdCol.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
+        titleCol.setCellValueFactory(new PropertyValueFactory<>("title"));
+        descriptionCol.setCellValueFactory(new PropertyValueFactory<>("description"));
+        startCol.setCellValueFactory(new PropertyValueFactory<>("start"));
+        endCol.setCellValueFactory(new PropertyValueFactory<>("end"));
+        locationCol.setCellValueFactory(new PropertyValueFactory<>("location"));
+        customerIdCol.setCellValueFactory(new PropertyValueFactory<>("customerID"));
+        contactIDCol.setCellValueFactory(new PropertyValueFactory<>("contactID"));
+        buildAppointmentList();
+        fillTable();
+    }
+
+    /**
+     * resets the table view.
+     */
+    public void refreshListClicked(){
         buildAppointmentList();
         fillTable();
     }
@@ -197,8 +205,7 @@ public class ManageAppointmentsController {
             try{
                 dbUtils.connStatement.execute(String.format("delete from appointments where Appointment_ID = %d", selectedAppointment.getAppointmentID()));
                 dbUtils.connStatement.close();
-                String[] className = this.getClass().getName().split("\\.");
-                MainController.refreshList(className[className.length -1 ]);
+
                 buildAppointmentList();
             }catch (SQLException e){
                 System.out.println(e.getMessage());
@@ -215,7 +222,8 @@ public class ManageAppointmentsController {
     public static void deleteAssociatedAppointments(Customer customer){
         dbUtils.establishConnection();
         try{
-            dbUtils.connStatement.execute(String.format("delete from appointments where Customer_ID = %d", customer.getCustomer_id()));
+            dbUtils.connStatement.execute(String.format("delete from appointments where Customer_ID = %d", Integer.parseInt( customer.getCustomer_id())));
+            buildAppointmentList();
         }catch(SQLException e){
             System.out.println(e.getMessage());
         }

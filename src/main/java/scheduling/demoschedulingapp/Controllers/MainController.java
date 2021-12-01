@@ -3,14 +3,13 @@ package scheduling.demoschedulingapp.Controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Tab;
-
 import java.util.HashMap;
 import java.util.Locale;
 
 public class MainController {
 
     @FXML
-    Tab manageCustomerTabLbl, manageAppointmentTabLbl, reportsTabLbl, logsTabLbl;
+    Tab manageCustomerTabLbl, viewAppointmentsTab,  manageAppointmentTabLbl, reportsTabLbl, logsTabLbl;
 
     @FXML
     public void initialize(){
@@ -44,10 +43,12 @@ public class MainController {
             case "AddAppointmentController":
                 ManageAppointmentsController.buildAppointmentList();
                 break;
-            case "ManageAppointmentsController":
-                break;
             default:
                 return;
         }
-    }
+   }
+
+
+
 }
+

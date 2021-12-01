@@ -22,14 +22,12 @@ public class ViewAppointmentsController {
     @FXML
     RadioButton viewAll, viewMonth,viewWeek;
     @FXML
-    Button refreshBtn;
-    @FXML
     TableView<Appointment> viewAppTable;
     @FXML
     TableColumn<Appointment, String> appointmentIDCol, titleCol, descriptCol, startCol, contCol,
                                         endCol, locCol, cusIdCol, userIdCol, typeCol;
 
-    private ObservableList<Appointment> appointments = FXCollections.observableArrayList();
+    private static ObservableList<Appointment> appointments = FXCollections.observableArrayList();
 
     @FXML
     public void initialize(){
@@ -49,20 +47,19 @@ public class ViewAppointmentsController {
         setView("viewAll");
     }
 
+    public void refreshBtnClick(){
+        viewAll.selectedProperty().setValue(true);
+        buildList();
+        setView("viewAll");
+    }
+
     /**
      * decides which radio button was selected.
      * then tells setView what to send filterView.
      * @param e the radio button being selected.
      */
     public void handleChange(ActionEvent e){
-        String buttonName = "";
-        if(e.getTarget().equals(refreshBtn)){
-           buttonName = ((Button) e.getTarget()).getId();
-           viewAll.selectedProperty().setValue(true);
-        }else{
-            buttonName =  ((RadioButton) e.getTarget()).getId();
-        }
-
+        String buttonName =  ((RadioButton) e.getTarget()).getId();
         setView(buttonName);
     }
 
@@ -94,10 +91,11 @@ public class ViewAppointmentsController {
      * gets all the Appointments from the database.
      * Then puts them in a list.
      */
-    private void buildList(){
+    public static void buildList(){
+
         try {
-            dbUtils.establishConnection();
             appointments.clear();
+            dbUtils.establishConnection();
             ResultSet answer = dbUtils.connStatement.executeQuery("select * from appointments");
             while (answer.next()) {
                 int appointmentID = answer.getInt("Appointment_ID");

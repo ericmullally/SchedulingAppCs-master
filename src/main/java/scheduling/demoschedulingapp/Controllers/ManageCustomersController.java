@@ -51,6 +51,14 @@ public class ManageCustomersController {
     }
 
     /**
+     * refreshes the table view.
+     */
+    public void refreshListClick(){
+        buildCustomerList();
+        fillTable();
+    }
+
+    /**
      * sets language to french if it detects the host computer is using french.
      * contains lambda.
      */
@@ -194,8 +202,9 @@ public class ManageCustomersController {
             try{
                 ManageAppointmentsController.deleteAssociatedAppointments(selectedCustomer);
                 dbUtils.establishConnection();
-                dbUtils.connStatement.execute(String.format("delete from customers where Customer_ID = \"%s\"", selectedCustomer.getCustomer_id()));
+                dbUtils.connStatement.execute(String.format("delete from customers where Customer_ID = %d", Integer.parseInt(selectedCustomer.getCustomer_id())));
                 buildCustomerList();
+                fillTable();
             }catch(SQLException e){
                 System.out.println(e.getMessage());
             }

@@ -284,8 +284,9 @@ public class AddAppointmentController {
     }
 
     /**
-     * checks that the customer name has been provided.
-     * @return false if there is an error true otherwise.
+     * checks that the customer name, a contact, and a type
+     * has been provided.
+     * @return true if there is an error false otherwise.
      */
     private Boolean checkFields(){
         if(cusNameBox.getValue() == null || contactBox.getValue() == null || typeBox.getValue() == null){
@@ -311,7 +312,7 @@ public class AddAppointmentController {
     /**
      * checks that the appointment being created does not conflict with the customers
      * other appointments and that the appointment is within business hours.
-     * @return false if there is a conflict true otherwise.
+     * @return true if there is a conflict false otherwise.
      */
     private Boolean checkTime() {
         dbUtils.establishConnection();
@@ -380,12 +381,19 @@ public class AddAppointmentController {
                                                         "Yes it would be smarter to make these times unavailable, but that wasn't the assignment. ", businessStart, businessEnd));
             scheduleError.showAndWait();
             return true;
-        }else if(enteredStart.isAfter(enteredEnd) || enteredEnd.isBefore(enteredStart)){
+        }else if(enteredStart.isAfter(enteredEnd) || enteredEnd.isBefore(enteredStart)) {
             Alert timeMaths = new Alert(Alert.AlertType.ERROR);
             timeMaths.setTitle("Scheduling Error");
             timeMaths.setContentText(enteredStart.isAfter(enteredEnd) ? "Start time is after end time." : "End time is after start time.");
             timeMaths.showAndWait();
             return true;
+        }else if(enteredStart.isEqual(enteredEnd)){
+            Alert sameTimes = new Alert(Alert.AlertType.ERROR);
+            sameTimes.setTitle("Time Error");
+            sameTimes.setContentText("The start and end times cannot be the same.");
+            sameTimes.showAndWait();
+            return true;
+
         }else{
             return false;
         }

@@ -1,6 +1,13 @@
 package scheduling.demoschedulingapp.Classes;
 
+import java.time.LocalDateTime;
+import java.time.OffsetTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
 public class Appointment {
+
+    private final int timeOffset = ZonedDateTime.now().getOffset().getTotalSeconds();
 
     private int appointmentID;
     private String title;
@@ -26,8 +33,8 @@ public class Appointment {
         this.description = description;
         this.location = location;
         this.type = type;
-        this.start = start;
-        this.end = end;
+        this.start = LocalDateTime.parse(start.replace(" ", "T")).plusSeconds(timeOffset).toString().replace("T", " ");
+        this.end = LocalDateTime.parse(end.replace(" ", "T")).plusSeconds(timeOffset).toString().replace("T", " ");
         this.createDate = createDate;
         this.createdBy = createdBy;
         this.lastUpdate = lastUpdate;

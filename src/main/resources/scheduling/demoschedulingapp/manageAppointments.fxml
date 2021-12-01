@@ -24,7 +24,7 @@
         </TableView>
         <ButtonBar layoutY="14.0" prefHeight="40.0" prefWidth="780.0" style="-fx-background-color: black;" AnchorPane.bottomAnchor="271.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="14.0">
             <buttons>
-                <Button fx:id="addAppointmentBtn" mnemonicParsing="false" onAction="#openAddAppointment" prefHeight="25.0" prefWidth="338.0" text="Add Appointment">
+                <Button fx:id="addAppointmentBtn" mnemonicParsing="false" onAction="#openAddAppointment" prefHeight="27.0" prefWidth="338.0" text="Add Appointment">
                     <styleClass>
                         <String fx:value="btn" />
                         <String fx:value="show_btn" />
@@ -42,6 +42,12 @@
                         <String fx:value="show_btn" />
                     </styleClass>
                 </Button>
+            <Button fx:id="refreshBtn" layoutX="540.0" layoutY="17.0" mnemonicParsing="false" onAction="#refreshListClicked" text="Refresh List">
+               <styleClass>
+                  <String fx:value="btn" />
+                  <String fx:value="show_btn" />
+               </styleClass>
+            </Button>
             </buttons>
             <padding>
                 <Insets right="5.0" />
