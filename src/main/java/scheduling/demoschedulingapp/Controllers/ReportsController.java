@@ -19,6 +19,9 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * controls all tabs in the reports section.
+ */
 public class ReportsController {
     //region appointment fxml
     @FXML
@@ -67,6 +70,7 @@ public class ReportsController {
         startCol.setCellValueFactory(new PropertyValueFactory<>("start"));
         endCol.setCellValueFactory(new PropertyValueFactory<>("end"));
         customerIdCol.setCellValueFactory(new PropertyValueFactory<>("customerID"));
+        customerAppointmentCount.setAnimated(false);
         buildContactScheduleList();
         setFilter();
         buildCusAppointmentMap();
@@ -115,7 +119,7 @@ public class ReportsController {
     /**
      * fills the appointment table with the type and number of appointments
      * for the button that was clicked.
-     * @param month
+     * @param month month to be displayed.
      */
     private void fillTypeAppointment(int month){
         ObservableList<Appointment> appointments = FXCollections.observableArrayList();
@@ -269,14 +273,21 @@ public class ReportsController {
     //region by country
     private static HashMap<String, Integer> customerAppointments = new HashMap<>();
 
+    /**
+     * sets the chart for the customers appointments.
+     */
     private void setChart(){
         customerAppointmentCount.getData().clear();
         XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Appointments");
         customerAppointments.forEach((k,v)-> series.getData().add(new XYChart.Data<>(k,v)) );
         customerAppointmentCount.getData().add(series);
 
     }
 
+    /**
+     * builds the hasmap to be used in the chart.
+     */
     public static void buildCusAppointmentMap() {
         customerAppointments.clear();
         dbUtils.establishConnection();

@@ -17,6 +17,9 @@ import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Locale;
 
+/**
+ * Controls the add customer page.
+ */
 public class addCustomerController {
 
     @FXML
@@ -138,6 +141,7 @@ public class addCustomerController {
      * Sends the request to the server to create a new customer.
      * displays Success message if customer is added
      *
+     * @throws SQLException
      */
     public void makeAddRequest() throws SQLException {
         if(!checkEntry()){
@@ -275,6 +279,7 @@ public class addCustomerController {
     /**
      * Closes the add customer form.
      * @param mouseEvent the event that happened as an object with several parameters, such as the name.
+     * @throws SQLException
      */
     public void addCustomerCancel(MouseEvent mouseEvent) throws SQLException {
         mouseEvent.consume();

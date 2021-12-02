@@ -6,17 +6,17 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import scheduling.demoschedulingapp.Classes.Appointment;
 import scheduling.demoschedulingapp.Classes.Log;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+/**
+ * controls all login activity.
+ */
 public class LogsController {
 
     @FXML
@@ -36,6 +36,9 @@ public class LogsController {
             fillTable();
     }
 
+    /**
+     * builds the list of log objects.
+     */
     private void buildList(){
 
         try{
@@ -59,6 +62,9 @@ public class LogsController {
         }
     }
 
+    /**
+     * fills the log table.
+     */
     private void fillTable(){
         logsTable.setItems(logs);
     }

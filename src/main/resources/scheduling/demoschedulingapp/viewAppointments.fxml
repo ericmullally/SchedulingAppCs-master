@@ -35,7 +35,7 @@
             </RadioButton>
             <RadioButton fx:id="viewMonth" mnemonicParsing="false" onAction="#handleChange" styleClass="tab-label" text="View Month" toggleGroup="$view" />
             <RadioButton fx:id="viewWeek" mnemonicParsing="false" onAction="#handleChange" styleClass="tab-label" text="View week" toggleGroup="$view" />
-          <Button fx:id="refreshBtn" mnemonicParsing="false" onAction="#refreshBtnClick" text="Button">
+          <Button fx:id="refreshBtn" mnemonicParsing="false" onAction="#refreshBtnClick" text="Refresh">
                <styleClass>
                   <String fx:value="btn" />
                   <String fx:value="show_btn" />

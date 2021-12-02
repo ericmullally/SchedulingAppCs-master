@@ -17,8 +17,14 @@ public class MainController {
     }
 
     /**
+     *
+     * Lambda expression justification:
+     * the map of french tabs is iterable and could be operated on with
+     * a normal for loop. however the built in method forEach uses the
+     * same time cost and is much cleaner. though a little harder to read,
+     * it substantially cuts down on the functions size.
+     *
      * sets language to french if it detects the host computer is using french.
-     * contains lambda.
      */
     private void setLanguage(){
         HashMap<Tab, String> FrenchMainTabs = new HashMap<Tab, String>(){
@@ -35,6 +41,11 @@ public class MainController {
         }
     }
 
+    /**
+     * sends a refresh request to manage customers controller or manage appointments controller.
+     * whenever an appointment or customer is added.
+     * @param nameOfController String the name of the controller who called this function.
+     */
     public static void refreshList(String nameOfController){
         switch(nameOfController){
             case "addCustomerController":

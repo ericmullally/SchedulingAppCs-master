@@ -140,6 +140,11 @@ public class LoginController {
         }
     }
 
+    /**
+     * adds a log entry into login_activity.txt
+     * @param name name the user used
+     * @param success String rather or not the attempt was successful.
+     */
     private void addLog(String name, String success){
         try{
             BufferedWriter fw = new BufferedWriter(new FileWriter("login_activity.txt", true));

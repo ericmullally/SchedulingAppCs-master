@@ -1,3 +1,4 @@
 # Project exclude paths
 /target/
+README.txt
 scheduling.dbConnection

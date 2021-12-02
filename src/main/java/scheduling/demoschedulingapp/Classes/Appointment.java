@@ -5,6 +5,10 @@ import java.time.OffsetTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
+/**
+ * An appointment with all details form the database
+ * and the time updated to the current users time.
+ */
 public class Appointment {
 
     private final int timeOffset = ZonedDateTime.now().getOffset().getTotalSeconds();

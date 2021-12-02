@@ -14,7 +14,9 @@ import java.sql.SQLException;
 import java.time.*;
 import java.util.HashMap;
 
-
+/**
+ * controls the add appointment form.
+ */
 public class AddAppointmentController {
 
     @FXML
@@ -46,6 +48,10 @@ public class AddAppointmentController {
         appointmentIdTxt.setText(String.valueOf(appointmentID));
     }
 
+    /**
+     * changes this controller to function as an appointment editor.
+     * @param app the Appointment to edit.
+     */
     public void makeEdit(Appointment app){
         isEdit = true;
         appointmentID = app.getAppointmentID();
@@ -154,6 +160,10 @@ public class AddAppointmentController {
     /**
      * sets value factory for all time spinners and uses filter
      * on event handler to ensure only numbers are set.
+     * @param sHour the hour to initialize the start hour spinner to.
+     * @param sMin the minute to initialize the start minute spinner to.
+     * @param eHour the hour to initialize the end hour to.
+     * @param eMin the hour to initialize the end minute to.
      */
     private void setTimeBoxes(int sHour, int sMin, int eHour, int eMin){
         SpinnerValueFactory<Integer> startHours = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 24);
@@ -437,6 +447,15 @@ public class AddAppointmentController {
         stage.close();
     }
 
+    /**
+     * retrieves the name of the client, user, or contact
+     * depending on the input.
+     * @param columnName name of the column in the database table.(example "Customer_Name")
+     * @param tableName name of the table to look in (example customers)
+     * @param typeID the type of Id to use for comparison in the query (example "Customer_ID")
+     * @param id the ID to Look for
+     * @return String the name of the person owning the ID.
+     */
     private String getName( String columnName, String tableName, String typeID, int id){
         dbUtils.establishConnection();
         String name = "";

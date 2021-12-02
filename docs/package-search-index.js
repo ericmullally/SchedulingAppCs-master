@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"m":"scheduling.demoschedulingapp","l":"scheduling.demoschedulingapp"},{"m":"scheduling.demoschedulingapp","l":"scheduling.demoschedulingapp.Controllers"}]

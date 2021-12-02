@@ -21,7 +21,9 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Optional;
 
-
+/**
+ * Controls the Manage appointments tab.
+ */
 public class ManageAppointmentsController {
 
     @FXML

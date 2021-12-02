@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,6 +48,9 @@ public class ViewAppointmentsController {
         setView("viewAll");
     }
 
+    /**
+     * refreshes the table of appointments and sets the view all radio button to selected.
+     */
     public void refreshBtnClick(){
         viewAll.selectedProperty().setValue(true);
         buildList();
@@ -92,7 +96,6 @@ public class ViewAppointmentsController {
      * Then puts them in a list.
      */
     public static void buildList(){
-
         try {
             appointments.clear();
             dbUtils.establishConnection();
@@ -133,8 +136,6 @@ public class ViewAppointmentsController {
         buildList();
         LocalDate thisDate = LocalDate.now();
         Month thisMonth = thisDate.getMonth();
-        DayOfWeek thisWeek =   thisDate.getDayOfWeek().plus(7);
-        LocalDate nextWeek = thisDate.plusWeeks(1);
 
         if(timeFrame == "month"){
             List<Appointment> monthList = appointments.stream().filter(a-> LocalDate.parse(a.getStart().split(" ")[0]).getMonth() == thisMonth  ).collect(Collectors.toList());
@@ -145,9 +146,8 @@ public class ViewAppointmentsController {
             }
 
         }else if(timeFrame == "week"){
-            List<Appointment> weekList = appointments.stream().filter(a-> (LocalDate.parse(a.getStart().split(" ")[0]).getMonth().equals(thisMonth)) &&
-                    LocalDate.parse(a.getStart().split(" ")[0]).getDayOfWeek().getValue() < nextWeek.getDayOfWeek().getValue() &&
-                    LocalDate.parse(a.getStart().split(" ")[0]).getDayOfWeek().getValue() > thisWeek.getValue()  ).collect(Collectors.toList());
+            List<Appointment> weekList = appointments.stream().filter(a-> ChronoUnit.DAYS.between(thisDate, LocalDate.parse(a.getStart().split(" ")[0])) <= 7 &&
+                                                                          ChronoUnit.DAYS.between(thisDate, LocalDate.parse(a.getStart().split(" ")[0])) > 0).collect(Collectors.toList());
             if (weekList.size() > 0) {
                 viewAppTable.getItems().addAll(weekList);
             } else {
