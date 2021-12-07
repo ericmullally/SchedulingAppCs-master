@@ -1,7 +1,7 @@
 package scheduling.demoschedulingapp.Classes;
 
 import java.time.LocalDateTime;
-import java.time.OffsetTime;
+
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
@@ -18,8 +18,10 @@ public class Appointment {
     private String description;
     private String location;
     private String type;
-    private String start;
-    private String end;
+    private ZonedDateTime start;
+    private ZonedDateTime end;
+    private String startString;
+    private String endString;
     private String createDate;
     private String createdBy;
     private String lastUpdate;
@@ -32,13 +34,21 @@ public class Appointment {
     public Appointment(  int appointment_ID, String title, String description,String location,String type, String start, String end,
                          String createDate, String createdBy, String lastUpdate, String lastUpdatedBy,int customerID, int userID, int contactID)
     {
+        LocalDateTime localStart = LocalDateTime.parse(start.replace(" ", "T"));
+        LocalDateTime localEnd = LocalDateTime.parse(end.replace(" ", "T"));
+
+        ZonedDateTime dbStartConverted = TimeConversion.convertTimes(ZonedDateTime.of(localStart, ZoneId.of("UTC")), User.getInstance().getUserTimeZone());
+        ZonedDateTime dbEndConverted = TimeConversion.convertTimes(ZonedDateTime.of(localEnd, ZoneId.of("UTC")), User.getInstance().getUserTimeZone());
+
         this.appointmentID = appointment_ID;
         this.title = title;
         this.description = description;
         this.location = location;
         this.type = type;
-        this.start = LocalDateTime.parse(start.replace(" ", "T")).plusSeconds(timeOffset).toString().replace("T", " ");
-        this.end = LocalDateTime.parse(end.replace(" ", "T")).plusSeconds(timeOffset).toString().replace("T", " ");
+        this.start = dbStartConverted;
+        this.end =  dbEndConverted ;
+        this.startString = buildStartString(dbStartConverted.toString());
+        this.endString = buildEndString(dbEndConverted.toString());
         this.createDate = createDate;
         this.createdBy = createdBy;
         this.lastUpdate = lastUpdate;
@@ -54,8 +64,10 @@ public class Appointment {
     public String getDescription() { return description;}
     public String getLocation() {return location;}
     public String getType() {return type;}
-    public String getStart() {return start;}
-    public String getEnd() {return end;}
+    public ZonedDateTime getStart() {return start;}
+    public ZonedDateTime getEnd() {return end;}
+    public String getStartString(){return startString;}
+    public String getEndString(){return endString;}
     public String getCreateDate() {return createDate;}
     public String getCreatedBy() {return createdBy;}
     public String getLastUpdate() {return lastUpdate;}
@@ -69,8 +81,8 @@ public class Appointment {
     public void setDescription(String description){this.description = description ;}
     public void setLocation(String location){this.location = location ;}
     public void setType(String type){this.type = type ;}
-    public void setStart(String start){this.start = start;}
-    public void setEnd(String end){this.end = end;}
+    public void setStart(ZonedDateTime start){this.start = start;}
+    public void setEnd(ZonedDateTime end){this.end = end;}
     public void setCreateDate(String createDate){this.createDate = createDate;}
     public void setCreatedBy(String createdBy){this.createdBy = createdBy;}
     public void setLastUpdate(String lastUpdate){this.lastUpdate = lastUpdate ;}
@@ -78,6 +90,42 @@ public class Appointment {
     public void setCustomerID(int customerID ){this.customerID = customerID ;}
     public void setUserID(int userID){this.userID = userID;}
     public void setContactID(int contactID){this.contactID = contactID;}
+
+    /**
+     * builds a string of the start time more appropriate for display purposes
+     * @param startTime localDateTime
+     * @return formatted string with the date and time.
+     */
+    public String buildStartString(String startTime){
+        String[] startList = startTime.split("T");
+        String timeList;
+        if(startList[1].contains("-"))
+            timeList = startList[1].split("-")[0];
+        else if(startList[1].contains("+")){
+            timeList = startList[1].split(java.util.regex.Pattern.quote("+"))[0];
+        }else{
+            timeList = startList[1].split("Z")[0];
+        }
+        return String.format("%s %s", startList[0], timeList);
+    }
+
+    /**
+     * builds a string of the end time more appropriate for display purposes
+     * @param endTime localDateTime
+     * @return formatted string with the date and time.
+     */
+    public String buildEndString(String endTime){
+        String[] endList = endTime.split("T");
+        String timeList;
+        if(endList[1].contains("-"))
+            timeList = endList[1].split("-")[0];
+        else if(endList[1].contains("+")){
+            timeList = endList[1].split(java.util.regex.Pattern.quote("+"))[0];
+        }else{
+            timeList = endList[1].split("Z")[0];
+        }
+        return String.format("%s %s", endList[0], timeList);
+    }
 
 
 }

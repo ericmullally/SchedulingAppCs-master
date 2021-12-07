@@ -1,14 +1,12 @@
 package scheduling.demoschedulingapp.Classes;
-
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Locale;
 
 
 /**
- * Singleton class Providing the entire application with username and system language.
+ * Singleton class Providing the entire application with the users
+ * username, system language and timezone Id.
  */
 public class User {
     private String userName;
@@ -27,11 +25,6 @@ public class User {
     public String getUserName(){ return this.userName;}
     public String getSystemLanguage() {return systemLanguage;}
     public ZoneId getUserTimeZone(){return userTimeZone;}
-
-
-
-    public void checkMeetingAlert(){
-
-    }
+    
 
 }

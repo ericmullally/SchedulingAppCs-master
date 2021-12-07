@@ -7,6 +7,7 @@ import javafx.scene.control.*;
 
 import javafx.stage.Stage;
 import scheduling.demoschedulingapp.Classes.Appointment;
+import scheduling.demoschedulingapp.Classes.TimeConversion;
 import scheduling.demoschedulingapp.Classes.User;
 
 import java.sql.ResultSet;
@@ -19,6 +20,7 @@ import java.util.HashMap;
  */
 public class AddAppointmentController {
 
+    //region form items
     @FXML
     TextField appointmentIdTxt, titleTxt, locationTxt;
     @FXML
@@ -33,7 +35,7 @@ public class AddAppointmentController {
     Button submitBtn, cancelBtn;
     @FXML
     Label appLbl, titleLbl, descLbl, cusNameLbl, locLbl, typeLbl, dateLbl, startLbl, endLbl, contactLbl ;
-
+    //endregion
     int appointmentID;
     Boolean isEdit = false;
 
@@ -55,12 +57,11 @@ public class AddAppointmentController {
     public void makeEdit(Appointment app){
         isEdit = true;
         appointmentID = app.getAppointmentID();
-        String[] startDateArray = app.getStart().split(" ");
-        String[] endDateArray = app.getEnd().split(" ");
-        int sHour = Integer.parseInt(startDateArray[1].split(":")[0]);
-        int sMin = Integer.parseInt(startDateArray[1].split(":")[1]);
-        int eHour = Integer.parseInt(endDateArray[1].split(":")[0]);
-        int eMin = Integer.parseInt(startDateArray[1].split(":")[1]);
+
+        int sHour = app.getStart().getHour();
+        int sMin = app.getStart().getMinute();
+        int eHour = app.getEnd().getHour();
+        int eMin = app.getEnd().getMinute();
 
         titleTxt.setText(app.getTitle());
         descTxt.setText(app.getDescription());
@@ -68,9 +69,8 @@ public class AddAppointmentController {
         contactBox.getSelectionModel().select(getName("Contact_Name", "contacts", "Contact_ID", app.getContactID()));
         locationTxt.setText(app.getLocation());
         typeBox.getSelectionModel().select(app.getType());
-        datePic.setValue(LocalDate.parse(startDateArray[0]));
+        datePic.setValue(app.getStart().toLocalDate());
         setTimeBoxes(sHour, sMin, eHour, eMin);
-
 
     }
 
@@ -131,9 +131,9 @@ public class AddAppointmentController {
      * on event handler to ensure only numbers are set.
      */
     private void setTimeBoxes(){
-        SpinnerValueFactory<Integer> startHours = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 24);
+        SpinnerValueFactory<Integer> startHours = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 23);
         SpinnerValueFactory<Integer> startMinutes = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59);
-        SpinnerValueFactory<Integer> endHours = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 24);
+        SpinnerValueFactory<Integer> endHours = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 23);
         SpinnerValueFactory<Integer> endMinutes = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59);
         startHours.setValue(0);
         startMinutes.setValue(00);
@@ -183,6 +183,7 @@ public class AddAppointmentController {
 
         ObservableList<Spinner> spinners = FXCollections.observableArrayList(startSpinnerHr, startSpinnerMin, endSpinnerHr, endSpinnerMin);
 
+        //adds a listener to each spinner making sure the data entered is am appropriate time
         spinners.forEach(spinner-> spinner.getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
                     if(!newValue.matches(numberPattern)){
                         spinner.getEditor().setText(oldValue);
@@ -222,10 +223,7 @@ public class AddAppointmentController {
      * adds the appointment to the database.
      */
     public void createAppointment(){
-        if(checkFields()){
-            return;
-        }
-        if(checkTime()){
+        if(checkFields() || checkTime() || checkBusinessHrs() || checkForOverlap()){
             return;
         }
 
@@ -252,28 +250,43 @@ public class AddAppointmentController {
     }
 
     /**
-     * builds the string for the make request function to use.
+     * <p>builds the string for the make request function to use.</p>
+     * <p><p>adds appointmentID, title,description, location, type, start, end, createdDate,createdBy, lastUpdate, lastUpdatedBy,customerID, userID, contactID;
+     * this includes the user id as required in the task: </p>
+     * <p>A3a bullet 4: "When adding and updating an appointment, record the following data: Appointment_ID, title, description, location, contact, type,
+     * start date and time, end date and time, Customer_ID, and User_ID."</p></p>
      * @return a string with the database command.
      */
     private String buildRequestString(){
-        ZonedDateTime utcTime = ZonedDateTime.of(LocalDateTime.now( ZoneId.of("UTC")), ZoneId.of("UTC"));
+        ZonedDateTime businessStart = TimeConversion.convertTimes(ZonedDateTime.of(LocalDateTime.of(datePic.getValue(), LocalTime.of(8,0)), ZoneId.of("US/Eastern")), User.getInstance().getUserTimeZone()) ;
+        ZonedDateTime businessEnd = TimeConversion.convertTimes(ZonedDateTime.of(LocalDateTime.of(datePic.getValue(), LocalTime.of(22,0)), ZoneId.of("US/Eastern")), User.getInstance().getUserTimeZone()) ;
+        Boolean changeDays = businessStart.getDayOfMonth() != businessEnd.getDayOfMonth() && startSpinnerHr.getValue() > endSpinnerHr.getValue() ;
+
+        LocalDateTime localStartTime = LocalDateTime.of(datePic.getValue(), LocalTime.of(startSpinnerHr.getValue() , startSpinnerMin.getValue()));
+        LocalDateTime localEndTime = LocalDateTime.of( changeDays ? datePic.getValue().plusDays(1) : datePic.getValue() , LocalTime.of(endSpinnerHr.getValue(), endSpinnerMin.getValue()));
+
+        ZonedDateTime zonedStart = TimeConversion.convertTimes( ZonedDateTime.of(localStartTime, ZoneId.of(User.getInstance().getUserTimeZone().toString())), ZoneId.of("UTC"));
+        ZonedDateTime zonedEnd = TimeConversion.convertTimes( ZonedDateTime.of(localEndTime, ZoneId.of(User.getInstance().getUserTimeZone().toString())), ZoneId.of("UTC"));;
+        ZonedDateTime zoneNow = TimeConversion.convertTimes(ZonedDateTime.now(), ZoneId.of("UTC"));
 
         ObservableList<Integer> ids = getIds();
         String title = titleTxt.getText();
         String description = descTxt.getText();
         String location = locationTxt.getText();
         String type = typeBox.getValue().toString();
-        LocalDateTime start =  LocalDateTime.of(datePic.getValue(), LocalTime.of(startSpinnerHr.getValue(),
-                startSpinnerMin.getValue())).plusSeconds(utcTime.getOffset().getTotalSeconds());
-        LocalDateTime end = LocalDateTime.of(datePic.getValue(), LocalTime.of(endSpinnerHr.getValue(),
-                endSpinnerMin.getValue())).plusSeconds(utcTime.getOffset().getTotalSeconds());
-        LocalDateTime createdDate = LocalDateTime.now().plusSeconds(utcTime.getOffset().getTotalSeconds());
+        LocalDateTime start = LocalDateTime.of(LocalDate.of(zonedStart.getYear(), zonedStart.getMonth(), zonedStart.getDayOfMonth()), LocalTime.of(zonedStart.getHour(), zonedStart.getMinute()));
+        LocalDateTime end =  LocalDateTime.of(LocalDate.of(zonedEnd.getYear(), zonedEnd.getMonth(), zonedEnd.getDayOfMonth()), LocalTime.of(zonedEnd.getHour(), zonedEnd.getMinute()));
+
+        LocalDateTime createdDate = LocalDateTime.of(LocalDate.of(zoneNow.getYear(), zoneNow.getMonth(), zoneNow.getDayOfMonth()), LocalTime.of(zoneNow.getHour(), zoneNow.getMinute()));
         String createdBy = User.getInstance().getUserName();
-        LocalDateTime lastUpdate =  LocalDateTime.now().plusSeconds(utcTime.getOffset().getTotalSeconds());
+        LocalDateTime lastUpdate =  LocalDateTime.of(LocalDate.of(zoneNow.getYear(), zoneNow.getMonth(), zoneNow.getDayOfMonth()), LocalTime.of(zoneNow.getHour(), zoneNow.getMinute()));;
         String lastUpdatedBy = User.getInstance().getUserName();
         int customerID = ids.get(0);
         int contactID = ids.get(1);
         int userID = ids.get(2);
+
+
+
         if(!isEdit){
             return String.format( "insert into appointments (Appointment_ID, Title, Description, Location, " +
                             "Type, Start, End, Create_Date, Created_By, Last_Update," +
@@ -320,76 +333,33 @@ public class AddAppointmentController {
     }
 
     /**
-     * checks that the appointment being created does not conflict with the customers
-     * other appointments and that the appointment is within business hours.
+     * first checks that the appointment date is not in the past.
+     * then proceeds to check the appointment start and end times make sense
      * @return true if there is a conflict false otherwise.
      */
     private Boolean checkTime() {
-        dbUtils.establishConnection();
-        ZoneOffset cooperateOffset = ZonedDateTime.of(LocalDateTime.now(ZoneId.of("US/Eastern")), ZoneId.of("US/Eastern")).getOffset();
-        LocalTime businessStart = LocalTime.of(8, 00).plusSeconds(cooperateOffset.getTotalSeconds());
-        LocalTime businessEnd = LocalTime.of(22, 00).plusSeconds(cooperateOffset.getTotalSeconds());
-        LocalDate today = LocalDate.now();
+        ZonedDateTime today = ZonedDateTime.now();
+        ZonedDateTime businessStart = TimeConversion.convertTimes(ZonedDateTime.of(LocalDateTime.of(datePic.getValue(), LocalTime.of(8,0)), ZoneId.of("US/Eastern")), User.getInstance().getUserTimeZone()) ;
+        ZonedDateTime businessEnd = TimeConversion.convertTimes(ZonedDateTime.of(LocalDateTime.of(datePic.getValue(), LocalTime.of(22,0)), ZoneId.of("US/Eastern")), User.getInstance().getUserTimeZone()) ;
+        Boolean changeDays = businessStart.getDayOfMonth() != businessEnd.getDayOfMonth() && startSpinnerHr.getValue() > endSpinnerHr.getValue() ;
 
         LocalDate enteredDate = LocalDate.of(datePic.getValue().getYear(), datePic.getValue().getMonth(), datePic.getValue().getDayOfMonth());
-        LocalDateTime enteredStart = LocalDateTime.of(enteredDate, LocalTime.of(startSpinnerHr.getValue(), startSpinnerMin.getValue()));
-        LocalDateTime enteredEnd = LocalDateTime.of(enteredDate, LocalTime.of(endSpinnerHr.getValue(), endSpinnerMin.getValue()));
+        LocalDateTime enteredStart = LocalDateTime.of(enteredDate, LocalTime.of(startSpinnerHr.getValue() , startSpinnerMin.getValue())); // needed a way to check if the time entered was for midnight
+        LocalDateTime enteredEnd = LocalDateTime.of( changeDays ? enteredDate.plusDays(1) : enteredDate   , LocalTime.of(endSpinnerHr.getValue(), endSpinnerMin.getValue())); //if the end is at midnight due to user timezone constraint we need to set the end date to the next day.
+
         DayOfWeek appointmentDay = datePic.getValue().getDayOfWeek();
 
-        if(today.isAfter(enteredDate)){
+        if(today.isAfter(ZonedDateTime.of(enteredStart, ZoneId.of(User.getInstance().getUserTimeZone().toString())))){
             Alert dayError = new Alert(Alert.AlertType.ERROR);
             dayError.setContentText("Incorrect Day");
             dayError.setContentText("The day you have selected has already passed.");
             dayError.show();
             return true;
-        }
-
-        try {
-
-            ResultSet customerIdRes = dbUtils.connStatement.executeQuery(String.format("select Customer_ID from customers where" +
-                    " Customer_Name = \"%s\"", cusNameBox.getValue()));
-            customerIdRes.next();
-            int customerID = customerIdRes.getInt("Customer_ID");
-            ResultSet customerAppointmentsRes = dbUtils.connStatement.executeQuery(String.format("select Start, End, Appointment_ID from appointments " +
-                                                                                                        "where Customer_ID = %s", customerID));
-            while (customerAppointmentsRes.next()) {
-                LocalDateTime start = LocalDateTime.parse(customerAppointmentsRes.getString("Start").replace(" ", "T"));
-                LocalDateTime end = LocalDateTime.parse(customerAppointmentsRes.getString("End").replace(" ", "T"));
-
-                if(start.getDayOfYear() == enteredStart.getDayOfYear() ){
-                    Boolean startOverlap = enteredStart.toLocalTime().isBefore(end.toLocalTime());
-                    Boolean endOverlap = end.toLocalTime().isAfter(enteredStart.toLocalTime());
-                    Boolean differentAppointment = customerAppointmentsRes.getInt("Appointment_ID") != appointmentID;
-
-                    if (( startOverlap || endOverlap ) && differentAppointment) {
-                        Alert scheduleError = new Alert(Alert.AlertType.ERROR);
-                        scheduleError.setTitle("Conflicting appointment");
-                        scheduleError.setContentText(String.format("%s Already has an appointment within this time frame.", cusNameBox.getValue()));
-                        scheduleError.showAndWait();
-                        return true;
-                    }
-                }
-            }
-            customerAppointmentsRes.close();
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-
-        if(appointmentDay.equals(DayOfWeek.SATURDAY) || appointmentDay.equals(DayOfWeek.SUNDAY)) {
+        }else if(appointmentDay.equals(DayOfWeek.SATURDAY) || appointmentDay.equals(DayOfWeek.SUNDAY)) {
             Alert dayError = new Alert(Alert.AlertType.ERROR);
             dayError.setTitle("WeekEnd Selected");
             dayError.setContentText("The appointment cannot be scheduled on saturday or sunday.");
             dayError.showAndWait();
-            return true;
-        }else if (LocalTime.of(enteredStart.getHour(), enteredStart.getMinute()).isBefore(businessStart) ||
-                    LocalTime.of(enteredEnd.getHour(), enteredEnd.getMinute()).isAfter(businessEnd)) {
-
-            Alert scheduleError = new Alert(Alert.AlertType.ERROR);
-            scheduleError.setTitle("Outside Business Hours");
-            scheduleError.setContentText(String.format("You have selected a time outside of business hours. " +
-                                                        "Business hours for your time zone are from: %s to:%s" +
-                                                        "Yes it would be smarter to make these times unavailable, but that wasn't the assignment. ", businessStart, businessEnd));
-            scheduleError.showAndWait();
             return true;
         }else if(enteredStart.isAfter(enteredEnd) || enteredEnd.isBefore(enteredStart)) {
             Alert timeMaths = new Alert(Alert.AlertType.ERROR);
@@ -407,6 +377,102 @@ public class AddAppointmentController {
         }else{
             return false;
         }
+    }
+
+    /**
+     * checks that the customer doesn't already have an appointment at this time.
+     * @return true if they do false if not
+     */
+    private Boolean checkForOverlap(){
+        dbUtils.establishConnection();
+        ZonedDateTime businessStart = TimeConversion.convertTimes(ZonedDateTime.of(LocalDateTime.of(datePic.getValue(), LocalTime.of(8,0)), ZoneId.of("US/Eastern")), User.getInstance().getUserTimeZone()) ;
+        ZonedDateTime businessEnd = TimeConversion.convertTimes(ZonedDateTime.of(LocalDateTime.of(datePic.getValue(), LocalTime.of(22,0)), ZoneId.of("US/Eastern")), User.getInstance().getUserTimeZone()) ;
+        Boolean changeDays = businessStart.getDayOfMonth() != businessEnd.getDayOfMonth() && startSpinnerHr.getValue() > endSpinnerHr.getValue() ; // if the user is in a time zone that requires appointments
+
+        LocalDate enteredDate = LocalDate.of(datePic.getValue().getYear(), datePic.getValue().getMonth(), datePic.getValue().getDayOfMonth());
+        LocalDateTime enteredStart = LocalDateTime.of(enteredDate, LocalTime.of(startSpinnerHr.getValue() == 24? 0 : startSpinnerHr.getValue(), startSpinnerMin.getValue()));
+        LocalDateTime enteredEnd = LocalDateTime.of( changeDays ? enteredDate.plusDays(1) : enteredDate , LocalTime.of(endSpinnerHr.getValue(), endSpinnerMin.getValue()));
+
+        ZonedDateTime zonedStart = ZonedDateTime.of(enteredStart, User.getInstance().getUserTimeZone());
+        ZonedDateTime zonedEnd = ZonedDateTime.of(enteredEnd, User.getInstance().getUserTimeZone());
+        try {
+
+            ResultSet customerIdRes = dbUtils.connStatement.executeQuery(String.format("select Customer_ID from customers where" +
+                    " Customer_Name = \"%s\"", cusNameBox.getValue()));
+            customerIdRes.next();
+            int customerID = customerIdRes.getInt("Customer_ID");
+            ResultSet customerAppointmentsRes = dbUtils.connStatement.executeQuery(String.format("select Start, End, Appointment_ID from appointments " +
+                    "where Customer_ID = %s", customerID));
+            while (customerAppointmentsRes.next()) {
+                ZonedDateTime start = TimeConversion.convertTimes(ZonedDateTime.of(LocalDateTime.parse(customerAppointmentsRes.getString("Start").replace(" ", "T")), ZoneId.of("UTC")), User.getInstance().getUserTimeZone());
+                ZonedDateTime end = TimeConversion.convertTimes(ZonedDateTime.of(LocalDateTime.parse(customerAppointmentsRes.getString("End").replace(" ", "T")), ZoneId.of("UTC")), User.getInstance().getUserTimeZone());
+
+                if(start.getDayOfYear() == zonedEnd.getDayOfYear() ){
+                    Boolean startOverlap =  zonedStart.isBefore(end);
+                    Boolean endOverlap = end.isAfter(zonedStart);
+                    Boolean differentAppointment = customerAppointmentsRes.getInt("Appointment_ID") != appointmentID; // in case we are editing then we can allow this.
+
+                    if (( startOverlap || endOverlap ) && differentAppointment) {
+                        Alert scheduleError = new Alert(Alert.AlertType.ERROR);
+                        scheduleError.setTitle("Conflicting appointment");
+                        scheduleError.setContentText(String.format("%s Already has an appointment within this time frame.", cusNameBox.getValue()));
+                        scheduleError.showAndWait();
+                        return true;
+                    }
+                }
+            }
+            customerAppointmentsRes.close();
+            return false;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Checks That the entered time falls within cooperate business hours.
+     * @return true if it does not false if it does.
+     */
+    private Boolean checkBusinessHrs(){
+        LocalDate enteredDate = LocalDate.of(datePic.getValue().getYear(), datePic.getValue().getMonth(), datePic.getValue().getDayOfMonth());
+        LocalDateTime enteredStart = LocalDateTime.of(enteredDate, LocalTime.of(startSpinnerHr.getValue() == 24? 0 : startSpinnerHr.getValue(), startSpinnerMin.getValue()));
+        LocalDateTime enteredEnd = LocalDateTime.of( endSpinnerHr.getValue() == 24 ?  enteredDate.plusDays(1) : enteredDate , LocalTime.of(endSpinnerHr.getValue() == 24? 0 : endSpinnerHr.getValue(), endSpinnerMin.getValue()));
+
+
+        ZonedDateTime zonedStart = ZonedDateTime.of(enteredStart, User.getInstance().getUserTimeZone());
+        ZonedDateTime zonedEnd = ZonedDateTime.of(enteredEnd, User.getInstance().getUserTimeZone());
+
+        ZonedDateTime businessStart = TimeConversion.convertTimes(ZonedDateTime.of(LocalDateTime.of(enteredStart.toLocalDate(), LocalTime.of(8,0)), ZoneId.of("US/Eastern")), User.getInstance().getUserTimeZone()) ;
+        ZonedDateTime businessEnd = TimeConversion.convertTimes(ZonedDateTime.of(LocalDateTime.of(enteredEnd.toLocalDate(), LocalTime.of(22,0)), ZoneId.of("US/Eastern")), User.getInstance().getUserTimeZone()) ;
+
+        if(zonedStart.isBefore(businessStart) || zonedEnd.isAfter(businessEnd)){
+            if(businessStart.getDayOfMonth() != businessEnd.getDayOfMonth()){
+                String[] startStringList = businessStart.toString().split("T");
+                String[] endStringList = businessEnd.toString().split("T");
+                String businessStartString = startStringList[1].contains("-") ? startStringList[1].split("-")[0] : startStringList[1].split("\\+")[0] ;
+                String businessEndString = endStringList[1].contains("-") ? endStringList[1].split("-")[0] : endStringList[1].split("\\+")[0] ;
+
+                Alert scheduleError = new Alert(Alert.AlertType.ERROR);
+                scheduleError.setTitle("Outside Business Hours");
+                scheduleError.setContentText(String.format("You have selected a time outside of business hours. " +
+                        "Business hours for your time zone are \nfrom: %s \nto: %s the following day.", businessStartString, businessEndString));
+                scheduleError.showAndWait();
+                return true;
+            }else{
+                String[] startStringList = businessStart.toString().split("T");
+                String[] endStringList = businessEnd.toString().split("T");
+                String businessStartString = startStringList[1].contains("-") ? startStringList[1].split("-")[0] : startStringList[1].split("\\+")[0] ;
+                String businessEndString = endStringList[1].contains("-") ? endStringList[1].split("-")[0] : endStringList[1].split("\\+")[0] ;
+
+                Alert scheduleError = new Alert(Alert.AlertType.ERROR);
+                scheduleError.setTitle("Outside Business Hours");
+                scheduleError.setContentText(String.format("You have selected a time outside of business hours. " +
+                        "Business hours for your time zone are from: %s to:%s", businessStartString, businessEndString));
+                scheduleError.showAndWait();
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

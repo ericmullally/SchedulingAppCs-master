@@ -42,8 +42,8 @@ public class ManageAppointmentsController {
         appointmentIdCol.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
         titleCol.setCellValueFactory(new PropertyValueFactory<>("title"));
         descriptionCol.setCellValueFactory(new PropertyValueFactory<>("description"));
-        startCol.setCellValueFactory(new PropertyValueFactory<>("start"));
-        endCol.setCellValueFactory(new PropertyValueFactory<>("end"));
+        startCol.setCellValueFactory(new PropertyValueFactory<>("startString"));
+        endCol.setCellValueFactory(new PropertyValueFactory<>("endString"));
         locationCol.setCellValueFactory(new PropertyValueFactory<>("location"));
         customerIdCol.setCellValueFactory(new PropertyValueFactory<>("customerID"));
         contactIDCol.setCellValueFactory(new PropertyValueFactory<>("contactID"));

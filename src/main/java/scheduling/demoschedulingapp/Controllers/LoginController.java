@@ -3,6 +3,7 @@ package scheduling.demoschedulingapp.Controllers;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import scheduling.demoschedulingapp.Classes.TimeConversion;
 import scheduling.demoschedulingapp.Classes.User;
 import scheduling.demoschedulingapp.SchedulingApplication;
 
@@ -12,8 +13,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.*;
 
 /**
@@ -47,13 +47,7 @@ public class LoginController {
         if (checkLogin(name, password)) {
             User.getInstance().setUserName(name);
             addLog(name, "success");
-            if(checkUpcomingAppointment()){
-                Alert upComingAppointment = new Alert(Alert.AlertType.INFORMATION);
-                upComingAppointment.setTitle("Appointment");
-                upComingAppointment.setContentText("You have an appointment in 15 minutes.");
-                upComingAppointment.show();
-            }
-
+            checkUpcomingAppointment();
             SchedulingApplication mainStage = new SchedulingApplication();
             mainStage.changeScene("main.fxml", "Scheduling App", 780, 400);
         } else {
@@ -95,28 +89,41 @@ public class LoginController {
      * checks if the user has an appointment within 15 minutes of login.
      * @return true if they do false otherwise.
      */
-    private Boolean checkUpcomingAppointment(){
+    private void checkUpcomingAppointment(){
         dbUtils.establishConnection();
-        int timeOffset = ZonedDateTime.now().getOffset().getTotalSeconds();
-        LocalDateTime now = LocalDateTime.now();
+
+        ZonedDateTime now = ZonedDateTime.now();
         try{
             ResultSet appointmentRes = dbUtils.connStatement.executeQuery("select * from appointments");
+            String ID;
+            String Date;
+            String Time;
+            String Message = "No Upcoming Appointments";
             while(appointmentRes.next()){
-                LocalDateTime adjustedAppointmentTime = LocalDateTime.parse(appointmentRes.getString("Start").replace(" ", "T")).plusSeconds(timeOffset);
-                Boolean isMonth = adjustedAppointmentTime.getDayOfMonth() == now.getDayOfMonth();
+                ZonedDateTime start = ZonedDateTime.of(LocalDateTime.parse(appointmentRes.getString("Start").replace(" ", "T")), ZoneId.of("UTC"));
+
+                ZonedDateTime adjustedAppointmentTime = TimeConversion.convertTimes(start, User.getInstance().getUserTimeZone());
+                Boolean isMonth = adjustedAppointmentTime.getMonth() == now.getMonth();
                 Boolean isDay = adjustedAppointmentTime.getDayOfYear() == now.getDayOfYear();
-                Boolean isHour = adjustedAppointmentTime.getHour() == now.getHour();
-                if(isMonth && isDay && isHour){
-                    if(adjustedAppointmentTime.getMinute() < now.plusMinutes(15).getMinute()){
-                        return true;
+
+                if(isMonth && isDay ){
+                    if(adjustedAppointmentTime.isBefore(now.plusMinutes(15)) && adjustedAppointmentTime.isAfter(now.minusMinutes(1))){
+                         ID = appointmentRes.getString("Appointment_ID");
+                         Date = LocalDate.of(adjustedAppointmentTime.getYear(), adjustedAppointmentTime.getMonth(), adjustedAppointmentTime.getDayOfMonth()).toString();
+                         Time = LocalTime.of(adjustedAppointmentTime.getHour(), adjustedAppointmentTime.getMinute()).toString();
+                         Message =String.format("Upcoming Appointment.\n AppointmentID: %s \n Date: %s \n Time: %s",ID, Date, Time );
                     }
                 }
             }
+            Alert upComingAppointment = new Alert(Alert.AlertType.INFORMATION);
+            upComingAppointment.setTitle("Appointment");
+            upComingAppointment.setContentText(Message);
+            upComingAppointment.show();
 
         }catch(SQLException e){
             System.out.println(e.getMessage());
         }
-        return false;
+
     }
 
     /**
@@ -148,7 +155,7 @@ public class LoginController {
     private void addLog(String name, String success){
         try{
             BufferedWriter fw = new BufferedWriter(new FileWriter("login_activity.txt", true));
-            LocalDateTime now = LocalDateTime.now();
+            ZonedDateTime now = ZonedDateTime.now();
             String content = String.format("%s_%s_%s\n", name, success, now);
             fw.write(content);
             fw.close();

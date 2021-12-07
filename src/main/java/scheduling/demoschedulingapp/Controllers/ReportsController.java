@@ -13,9 +13,14 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import scheduling.demoschedulingapp.Classes.Appointment;
+import scheduling.demoschedulingapp.Classes.TimeConversion;
+import scheduling.demoschedulingapp.Classes.User;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -190,15 +195,20 @@ public class ReportsController {
         private String title;
         private String type;
         private String description;
-        private String start;
-        private String end;
+        private ZonedDateTime start;
+        private ZonedDateTime end;
         private String customerID;
 
         public Schedule(String contactName,String appointmentID, String title,String type,
                         String description, String start, String end, String customerID ){
+            LocalDateTime localStart = LocalDateTime.parse(start.replace(" ", "T"));
+            LocalDateTime localEnd = LocalDateTime.parse(end.replace(" ", "T"));
+
+            ZonedDateTime dbStartConverted = TimeConversion.convertTimes(ZonedDateTime.of(localStart, ZoneId.of("UTC")), User.getInstance().getUserTimeZone());
+            ZonedDateTime dbEndConverted = TimeConversion.convertTimes(ZonedDateTime.of(localEnd, ZoneId.of("UTC")), User.getInstance().getUserTimeZone());
             this.contactName =contactName; this.appointmentID = appointmentID;
             this.title = title; this.type = type; this.description = description;
-            this.start = start; this.end = end; this.customerID = customerID;
+            this.start = dbStartConverted; this.end = dbEndConverted; this.customerID = customerID;
         }
 
         public String getAppointmentID(){return appointmentID;}
@@ -206,8 +216,30 @@ public class ReportsController {
         public String getTitle(){return title;}
         public String getType(){return type;}
         public String getDescription(){return description;}
-        public String getStart(){return start;}
-        public String getEnd(){return end;}
+        public String getStart(){
+            String[] startList = start.toString().split("T");
+            String timeList;
+            if(startList[1].contains("-"))
+                timeList = startList[1].split("-")[0];
+            else if(startList[1].contains("+")){
+                timeList = startList[1].split(java.util.regex.Pattern.quote("+"))[0];
+            }else{
+                timeList = startList[1].split("Z")[0];
+            }
+            return String.format("%s %s", startList[0], timeList);
+        }
+        public String getEnd(){
+            String[] endList = end.toString().split("T");
+            String timeList;
+            if(endList[1].contains("-"))
+                timeList = endList[1].split("-")[0];
+            else if(endList[1].contains("+")){
+                timeList = endList[1].split(java.util.regex.Pattern.quote("+"))[0];
+            }else{
+                timeList = endList[1].split("Z")[0];
+            }
+            return String.format("%s %s", endList[0], timeList);
+        }
         public String getCustomerID(){return customerID;}
     }
 
@@ -270,7 +302,7 @@ public class ReportsController {
 
     //endregion
 
-    //region by country
+    //region by customer
     private static HashMap<String, Integer> customerAppointments = new HashMap<>();
 
     /**
@@ -286,7 +318,7 @@ public class ReportsController {
     }
 
     /**
-     * builds the hasmap to be used in the chart.
+     * builds the hashmap to be used in the chart.
      */
     public static void buildCusAppointmentMap() {
         customerAppointments.clear();

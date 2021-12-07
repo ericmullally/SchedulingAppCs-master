@@ -12,7 +12,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.ZonedDateTime;
 
 /**
  * controls all login activity.
@@ -45,12 +45,15 @@ public class LogsController {
             BufferedReader fr = new BufferedReader( new FileReader("login_activity.txt"));
             String line = fr.readLine();
             while(line != null){
+
                 String[] logList= line.split("_");
                 String name = logList[0];
                 String success = logList[1];
-                String dateTime = logList[2];
-                String date = LocalDate.parse(dateTime.split("T")[0]).toString();
-                String time = LocalTime.parse(dateTime.split("T")[1]).toString();
+                String dateTime = logList[2].split("\\[")[0];
+                ZonedDateTime timeLog =  ZonedDateTime.parse(dateTime);
+
+                String date = String.format("%s", LocalDate.of(timeLog.getYear(), timeLog.getMonth(), timeLog.getDayOfMonth()));
+                String time =  String.format("%s:%s", timeLog.getHour(), timeLog.getMinute() );
                 Log newLog = new Log(name, time, date, success);
                 logs.add(newLog);
                 line = fr.readLine();

@@ -21,7 +21,7 @@ import java.util.Locale;
  * Controls the add customer page.
  */
 public class addCustomerController {
-
+    //region form fields
     @FXML
     TextField customerIdText, customerNameText, customerPhoneText, customerAddText, postalCodeText;
     @FXML
@@ -31,7 +31,7 @@ public class addCustomerController {
 
     @FXML
     Button addCustomerCancelBtn, addCustomerSubmit;
-
+    //endregion
     int customer_ID;
     Boolean isEdit = false;
 
@@ -50,7 +50,7 @@ public class addCustomerController {
      */
     public void makeEdit(Customer customer){
         isEdit =true;
-        this.customer_ID = Integer.parseInt(customer.getCustomer_id()); /*will overwrite the previously set ID*/
+        this.customer_ID = Integer.parseInt(customer.getCustomer_id()); //will overwrite the previously set ID
         customerIdText.setText(String.valueOf(customer_ID));
         customerNameText.setText(customer.getName());
         customerAddText.setText(customer.getAddress().split(",")[0]);

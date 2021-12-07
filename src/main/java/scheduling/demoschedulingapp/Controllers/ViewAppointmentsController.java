@@ -1,19 +1,18 @@
 package scheduling.demoschedulingapp.Controllers;
 
-import javafx.beans.property.StringPropertyBase;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.paint.Color;
 import scheduling.demoschedulingapp.Classes.Appointment;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.time.Month;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,8 +34,8 @@ public class ViewAppointmentsController {
         appointmentIDCol.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
         titleCol.setCellValueFactory(new PropertyValueFactory<>("title"));
         descriptCol.setCellValueFactory(new PropertyValueFactory<>("description"));
-        startCol.setCellValueFactory(new PropertyValueFactory<>("start"));
-        endCol.setCellValueFactory(new PropertyValueFactory<>("end"));
+        startCol.setCellValueFactory(new PropertyValueFactory<>("startString"));
+        endCol.setCellValueFactory(new PropertyValueFactory<>("endString"));
         locCol.setCellValueFactory(new PropertyValueFactory<>("location"));
         cusIdCol.setCellValueFactory(new PropertyValueFactory<>("customerID"));
         userIdCol.setCellValueFactory(new PropertyValueFactory<>("userID"));
@@ -118,6 +117,7 @@ public class ViewAppointmentsController {
 
                 Appointment appointment = new Appointment(appointmentID, title, description, location, type, start, end,
                         createDate, createdBy, lastUpdate, lastUpdatedBy, customerID, userID, contactID);
+
                 appointments.add(appointment);
             }
             dbUtils.connStatement.close();
@@ -134,28 +134,39 @@ public class ViewAppointmentsController {
     private void filterView(String timeFrame){
         viewAppTable.getItems().clear();
         buildList();
-        LocalDate thisDate = LocalDate.now();
+        ZonedDateTime thisDate = ZonedDateTime.now();
         Month thisMonth = thisDate.getMonth();
 
         if(timeFrame == "month"){
-            List<Appointment> monthList = appointments.stream().filter(a-> LocalDate.parse(a.getStart().split(" ")[0]).getMonth() == thisMonth  ).collect(Collectors.toList());
+            List<Appointment> monthList = appointments.stream().filter(a-> a.getStart().getMonth() == thisMonth  ).collect(Collectors.toList());
             if(monthList.size() > 0){
                 viewAppTable.getItems().addAll( monthList);
             }else{
-                viewAppTable.setPlaceholder(new Label("No Appointments this month."));
+                Label placeHolderLbl = new Label("No Appointments this month.");
+                placeHolderLbl.setTextFill(Color.WHITE);
+                viewAppTable.setPlaceholder(placeHolderLbl);
             }
 
         }else if(timeFrame == "week"){
-            List<Appointment> weekList = appointments.stream().filter(a-> ChronoUnit.DAYS.between(thisDate, LocalDate.parse(a.getStart().split(" ")[0])) <= 7 &&
-                                                                          ChronoUnit.DAYS.between(thisDate, LocalDate.parse(a.getStart().split(" ")[0])) > 0).collect(Collectors.toList());
+            List<Appointment> weekList = appointments.stream().filter(a-> a.getStart().getDayOfMonth() >= thisDate.getDayOfMonth() &&
+                                                                          a.getStart().getDayOfMonth() <= thisDate.plusDays(7).getDayOfMonth()).collect(Collectors.toList());
             if (weekList.size() > 0) {
                 viewAppTable.getItems().addAll(weekList);
             } else {
-                viewAppTable.setPlaceholder(new Label("No Appointments this week"));
+                Label placeHolderLbl = new Label("No Appointments this week");
+                placeHolderLbl.setTextFill(Color.WHITE);
+                viewAppTable.setPlaceholder(placeHolderLbl);
             }
 
         }else{
-            viewAppTable.getItems().addAll(appointments);
+            if(appointments.size() >= 1){
+                viewAppTable.getItems().addAll(appointments);
+            }else{
+                Label placeHolderLbl = new Label("No Appointments Available");
+                placeHolderLbl.setTextFill(Color.WHITE);
+                viewAppTable.setPlaceholder(placeHolderLbl);
+            }
+
         }
     }
 
